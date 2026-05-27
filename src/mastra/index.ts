@@ -1,13 +1,24 @@
-
 import { Mastra } from '@mastra/core/mastra';
 import { PinoLogger } from '@mastra/loggers';
 import { LibSQLStore } from '@mastra/libsql';
-import { DuckDBStore } from "@mastra/duckdb";
+import { DuckDBStore } from '@mastra/duckdb';
 import { MastraCompositeStore } from '@mastra/core/storage';
-import { Observability, MastraStorageExporter, MastraPlatformExporter, SensitiveDataFilter } from '@mastra/observability';
+import {
+  Observability,
+  MastraStorageExporter,
+  MastraPlatformExporter,
+  SensitiveDataFilter,
+} from '@mastra/observability';
 import { weatherWorkflow } from './workflows/weather-workflow';
 import { weatherAgent } from './agents/weather-agent';
-import { toolCallAppropriatenessScorer, completenessScorer, translationScorer } from './scorers/weather-scorer';
+import {
+  toolCallAppropriatenessScorer,
+  completenessScorer,
+  translationScorer,
+} from './scorers/weather-scorer';
+import * as Search from '@/modules/search';
+
+Search.init();
 
 export const mastra = new Mastra({
   workflows: { weatherWorkflow },
@@ -16,12 +27,12 @@ export const mastra = new Mastra({
   storage: new MastraCompositeStore({
     id: 'composite-storage',
     default: new LibSQLStore({
-      id: "mastra-storage",
-      url: "file:./mastra.db",
+      id: 'mastra-storage',
+      url: 'file:./mastra.db',
     }),
     domains: {
       observability: await new DuckDBStore().getStore('observability'),
-    }
+    },
   }),
   logger: new PinoLogger({
     name: 'Mastra',
