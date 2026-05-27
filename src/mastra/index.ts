@@ -9,21 +9,11 @@ import {
   MastraPlatformExporter,
   SensitiveDataFilter,
 } from '@mastra/observability';
-import { weatherWorkflow } from './workflows/weather-workflow';
-import { weatherAgent } from './agents/weather-agent';
-import {
-  toolCallAppropriatenessScorer,
-  completenessScorer,
-  translationScorer,
-} from './scorers/weather-scorer';
-import * as Search from '@/modules/search';
-
-Search.init();
 
 export const mastra = new Mastra({
-  workflows: { weatherWorkflow },
-  agents: { weatherAgent },
-  scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
+  workflows: {},
+  agents: {},
+  scorers: {},
   storage: new MastraCompositeStore({
     id: 'composite-storage',
     default: new LibSQLStore({
