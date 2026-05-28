@@ -15,6 +15,7 @@ import { fetchTool } from './tools/fetch.tool';
 import { storage } from './storage';
 import { verticalEntryWorkflow } from './workflows/vertical-entry';
 import { citationFormatScorer } from './scorers/citation-format.scorer';
+import { sourceDiversityScorer } from './scorers/source-diversity.scorer';
 
 searchInit();
 fetchInit();
@@ -24,7 +25,7 @@ export const mastra = new Mastra({
   workflows: { verticalEntryWorkflow },
   agents: { researcher },
   tools: { webSearchTool, fetchTool },
-  scorers: { citationFormat: citationFormatScorer },
+  scorers: { citationFormat: citationFormatScorer, sourceDiversity: sourceDiversityScorer },
   storage,
   logger: new PinoLogger({
     name: 'Mastra',
