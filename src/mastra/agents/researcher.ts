@@ -5,6 +5,7 @@ import { researchMemory } from '../memory';
 import { webSearchTool } from '../tools/web-search.tool';
 import { fetchTool } from '../tools/fetch.tool';
 import { ModelRole } from '../../modules/model/model-role.enum';
+import { citationFormatScorer } from '../scorers/citation-format.scorer';
 
 export const researcher = new Agent({
   id: 'vertical-researcher',
@@ -198,6 +199,12 @@ follow logically from what IS in working memory and the cited sections above.
   model: model(ModelRole.Synthesizer),
   tools: { webSearchTool, fetchTool },
   memory: researchMemory,
+  scorers: {
+    citationFormat: {
+      scorer: citationFormatScorer,
+      sampling: { type: 'ratio', rate: 1 },
+    },
+  },
   defaultOptions: {
     maxSteps: 25,
   },
