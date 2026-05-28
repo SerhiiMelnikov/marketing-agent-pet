@@ -6,6 +6,7 @@ import type { FetchRequest, FetchResult, FetchProvider } from '../types';
 import { FetchProviderName } from '../enums/provider-name.enum';
 import { FetchError } from '../error';
 import { DEFAULT_TIMEOUT_MS } from '../constants';
+import { getErrMsg } from '../../../utils/errors';
 
 export class FirecrawlProvider implements FetchProvider {
   readonly name = FetchProviderName.Firecrawl;
@@ -35,9 +36,9 @@ export class FirecrawlProvider implements FetchProvider {
         formats: ['markdown'],
         onlyMainContent: true,
       });
-    } catch (err: unknown) {
+    } catch (err) {
       throw new FetchError(
-        `Firecrawl scrape failed: ${err instanceof Error ? err.message : String(err)}`,
+        `Firecrawl scrape failed: ${getErrMsg(err)}`,
         request.url,
         this.name,
         err,
