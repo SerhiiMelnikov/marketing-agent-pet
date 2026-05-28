@@ -1,6 +1,6 @@
 import z from 'zod';
 import { createTool } from '@mastra/core/tools';
-import { search } from '@/modules/search';
+import { search } from '../../modules/search';
 
 const descriptions = {
   tool: 'Search the web for up-to-date information on a topic. Returns a ranked list of results with title, URL, a short snippet, and (when available) extracted page content. Use this to gather evidence on market trends, competitors, regulations, or any claim that must be sourced rather than recalled from training data. Prefer narrow, specific queries; pass `includeDomains` to bias toward high-quality sources (e.g. analyst firms, trade press) when the domain matters.',

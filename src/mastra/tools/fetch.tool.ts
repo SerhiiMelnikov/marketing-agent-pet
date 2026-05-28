@@ -1,6 +1,6 @@
 import z from 'zod';
 import { createTool } from '@mastra/core/tools';
-import { fetchUrl } from '@/modules/fetch';
+import { fetchUrl } from '../../modules/fetch';
 
 const descriptions = {
   tool: 'Fetch a single web page and return its main content as clean markdown. Use this after `web-search` when you need the full text of a result rather than just the snippet, or when an agent already has a known URL (e.g. a competitor homepage, a 10-K, an analyst report). Providers are tried in order — cheap HTTP+readability first, then Firecrawl for JS-heavy pages — so calls are best-effort and may return empty/short content for paywalls, bot walls, or dynamic apps.',
