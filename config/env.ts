@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import process from 'node:process';
 import { SearchProviderName } from '../src/modules/search/enums/provider.enum';
+import { openRouterModelSchema } from '../src/modules/model/openrouter-model';
 
 const envSchema = z.object({
   SEARCH_PROVIDER: z.enum(SearchProviderName).default(SearchProviderName.Tavily),
@@ -9,6 +10,10 @@ const envSchema = z.object({
   BRAVE_API_KEY: z.string().optional(),
   OPENROUTER_API_KEY: z.string().min(1),
   FIRECRAWL_API_KEY: z.string().trim().nonempty(),
+  MODEL_RESEARCHER: openRouterModelSchema.optional(),
+  MODEL_SYNTHESIZER: openRouterModelSchema.optional(),
+  MODEL_CHEAP: openRouterModelSchema.optional(),
+  APP_URL: z.url().optional(),
 });
 
 export const env = envSchema.parse(process.env);

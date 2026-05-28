@@ -1,4 +1,4 @@
-import { env } from '../../config/env';
+import { env } from '../../../config/env';
 import { getDailyModel } from './daily-model';
 import type { OpenRouterModel } from './openrouter-model';
 import { ModelRole } from './model-role.enum';
@@ -23,6 +23,7 @@ export function model(role: ModelRole): () => OpenRouterModel {
 
 export const describeModels = () => {
   const daily = getDailyModel();
+
   return {
     researcher: daily ?? OVERRIDES.researcher ?? DEFAULT_MODELS.researcher,
     synthesizer: daily ?? OVERRIDES.synthesizer ?? DEFAULT_MODELS.synthesizer,

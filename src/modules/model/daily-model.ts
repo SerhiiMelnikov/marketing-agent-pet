@@ -1,12 +1,8 @@
 import { z } from 'zod';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname } from 'node:path';
 import type { OpenRouterModel } from './openrouter-model';
-
-const ENDPOINT = 'https://shir-man.com/api/free-llm/top-models';
-const FETCH_TIMEOUT_MS = 15_000;
-const REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000;
-const STATE_FILE = join(process.cwd(), 'data', 'daily-model.json');
+import { ENDPOINT, FETCH_TIMEOUT_MS, STATE_FILE, REFRESH_INTERVAL_MS } from './constants';
 
 const responseSchema = z.object({
   models: z
@@ -27,11 +23,9 @@ const persistedSchema = z.object({
 
 let currentDailyModel: OpenRouterModel | null = null;
 
-export function getDailyModel(): OpenRouterModel | null {
-  return currentDailyModel;
-}
+export const getDailyModel = () => currentDailyModel;
 
-export async function refreshDailyModel(): Promise<void> {
+export async function refreshDailyModel() {
   try {
     const res = await fetch(ENDPOINT, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (!res.ok) {

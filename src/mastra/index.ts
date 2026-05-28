@@ -8,7 +8,7 @@ import {
 } from '@mastra/observability';
 import { init as searchInit } from '../modules/search';
 import { init as fetchInit } from '../modules/fetch';
-import { startDailyModelScheduler } from '../lib/model/daily-model';
+import { startDailyModelScheduler } from '../modules/model/daily-model';
 import { researcher } from './agents/researcher';
 import { webSearchTool } from './tools/web-search.tool';
 import { fetchTool } from './tools/fetch.tool';
