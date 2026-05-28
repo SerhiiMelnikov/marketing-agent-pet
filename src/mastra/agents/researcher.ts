@@ -7,6 +7,7 @@ import { fetchTool } from '../tools/fetch.tool';
 import { ModelRole } from '../../modules/model/model-role.enum';
 import { citationFormatScorer } from '../scorers/citation-format.scorer';
 import { sourceDiversityScorer } from '../scorers/source-diversity.scorer';
+import { citationIntegrityScorer } from '../scorers/citation-integrity.scorer';
 
 export const researcher = new Agent({
   id: 'vertical-researcher',
@@ -208,7 +209,11 @@ follow logically from what IS in working memory and the cited sections above.
     sourceDiversity: {
       scorer: sourceDiversityScorer,
       sampling: { type: 'ratio', rate: 1 },
-    }
+    },
+    citationIntegrity: {
+      scorer: citationIntegrityScorer,
+      sampling: { type: 'ratio', rate: 1 },
+    },
   },
   defaultOptions: {
     maxSteps: 25,
