@@ -11,6 +11,9 @@ import {
   FILE_ENCODING,
 } from './constants';
 import { getErrMsg } from '../../utils/errors';
+import { logger } from '../../utils/logger';
+
+const log = logger.child({ module: 'daily-model' });
 
 const responseSchema = z.object({
   models: z
@@ -85,9 +88,9 @@ export async function refreshDailyModel(): Promise<void> {
 
     await persist(model);
     currentDailyModel = model.id;
-    console.info(`Daily model refreshed: ${model.name} (${model.id})`);
+    log.info(`Daily model refreshed: ${model.name} (${model.id})`);
   } catch (err) {
-    console.warn(`Failed to refresh daily model: ${getErrMsg(err)} — keeping current value`);
+    log.warn(`Failed to refresh daily model: ${getErrMsg(err)} — keeping current value`);
   }
 }
 
@@ -97,9 +100,9 @@ export function startDailyModelScheduler() {
 
     if (persisted) {
       currentDailyModel = toOpenRouterId(persisted.id);
-      console.info(`Loaded persisted daily model: ${currentDailyModel}`);
+      log.info(`Loaded persisted daily model: ${currentDailyModel}`);
     } else {
-      console.info('No persisted daily model — will fetch on first opportunity');
+      log.info('No persisted daily model — will fetch on first opportunity');
     }
 
     const ageMs = persisted

@@ -1,11 +1,11 @@
 import { Mastra } from '@mastra/core/mastra';
-import { PinoLogger } from '@mastra/loggers';
 import {
   Observability,
   MastraStorageExporter,
   MastraPlatformExporter,
   SensitiveDataFilter,
 } from '@mastra/observability';
+import { logger } from '../utils/logger';
 import { init as searchInit } from '../modules/search';
 import { init as fetchInit } from '../modules/fetch';
 import { startDailyModelScheduler } from '../modules/model/daily-model';
@@ -36,10 +36,7 @@ export const mastra = new Mastra({
     claimGrounding: claimGroundingScorer,
   },
   storage,
-  logger: new PinoLogger({
-    name: 'Mastra',
-    level: 'info',
-  }),
+  logger,
   observability: new Observability({
     configs: {
       default: {
