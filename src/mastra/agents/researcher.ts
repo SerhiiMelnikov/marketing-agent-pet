@@ -42,9 +42,25 @@ For each sub-topic (market trends, competitors, ICPs, regulations), repeat this 
      line, or context — they may be truncated or pulled from the wrong section.
   5. **If the fetch returns a \`blocked\` field**, the page was gated
      (login-wall, paywall, captcha, or cookie-wall) and the markdown is
-     unreliable — do NOT quote from it. Fall back to the search snippet for
-     this URL, or move on to another source. Don't retry the same URL with
-     \`requiresJs: true\` — paywalls block the JS-capable provider too.
+     unreliable — do NOT quote from it. Do NOT retry the same URL with
+     \`requiresJs: true\` either; paywalls block the JS-capable provider the
+     same way. **Do not abandon the data point.** Follow the recovery
+     protocol:
+
+       a. Search again with the specific claim you wanted (e.g.
+          "Everest Group healthcare outsourcing market size 2024"). Analyst
+          firms publish headline numbers in press releases, news coverage,
+          and blog posts even when the full report is gated. Same firm,
+          different gate — there is almost always a free shadow.
+       b. Prefer the analyst's OWN press release or blog (e.g.
+          everestgrp.com/blog/, gartner.com/en/newsroom/) over the gated
+          report, then reputable secondary coverage that cites them
+          (trade press, GlobeNewswire/PRNewswire releases).
+       c. If after one more search the figure is still only behind a wall,
+          record it in "Open Questions" as
+          \`gated — headline figure not freely available (tried: <URLs>)\`
+          rather than dropping it silently.
+
   6. Record findings in working memory, quoting the evidence you used (snippet
      OR fetched content — note which) with the source URL.
 
