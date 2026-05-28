@@ -1,4 +1,4 @@
-import { env } from '../../../config/env';
+import { env } from '../../config/env';
 import { getDailyModel } from './daily-model';
 import type { OpenRouterModel } from './openrouter-model';
 import { ModelRole } from './model-role.enum';

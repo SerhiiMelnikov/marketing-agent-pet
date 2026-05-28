@@ -1,4 +1,4 @@
-import { env } from '@/config/env';
+import { env } from '../../config/env';
 import type { SearchProvider } from './types';
 import { SearchProviderName } from './enums/provider.enum';
 import { TavilyProvider } from './providers/tavily.provider';

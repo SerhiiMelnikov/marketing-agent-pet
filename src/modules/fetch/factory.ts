@@ -1,4 +1,4 @@
-import { env } from '@/config/env';
+import { env } from '../../config/env';
 import type { FetchProvider } from './types';
 import { FirecrawlProvider } from './providers/firecrawl.provider';
 

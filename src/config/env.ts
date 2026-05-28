@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import process from 'node:process';
-import { SearchProviderName } from '../src/modules/search/enums/provider.enum';
-import { openRouterModelSchema } from '../src/modules/model/openrouter-model';
+import { SearchProviderName } from '../modules/search/enums/provider.enum';
+import { openRouterModelSchema } from '../modules/model/openrouter-model';
 
 const envSchema = z.object({
   SEARCH_PROVIDER: z.enum(SearchProviderName).default(SearchProviderName.Tavily),
