@@ -1,34 +1,30 @@
 import { Mastra } from '@mastra/core/mastra';
 import { PinoLogger } from '@mastra/loggers';
-import { LibSQLStore } from '@mastra/libsql';
-import { DuckDBStore } from '@mastra/duckdb';
-import { MastraCompositeStore } from '@mastra/core/storage';
 import {
   Observability,
   MastraStorageExporter,
   MastraPlatformExporter,
   SensitiveDataFilter,
 } from '@mastra/observability';
-import { init as searchInit } from '@/modules/search';
-import { init as fetchInit } from '@/modules/fetch';
+import { init as searchInit } from '../modules/search';
+import { init as fetchInit } from '../modules/fetch';
+import { startDailyModelScheduler } from '../lib/model/daily-model';
+import { researcher } from './agents/researcher';
+import { webSearchTool } from './tools/web-search.tool';
+import { fetchTool } from './tools/fetch.tool';
+import { storage } from './storage';
+import { verticalEntryWorkflow } from './workflows/vertical-entry';
 
 searchInit();
 fetchInit();
+startDailyModelScheduler();
 
 export const mastra = new Mastra({
-  workflows: {},
-  agents: {},
+  workflows: { verticalEntryWorkflow },
+  agents: { researcher },
+  tools: { webSearchTool, fetchTool },
   scorers: {},
-  storage: new MastraCompositeStore({
-    id: 'composite-storage',
-    default: new LibSQLStore({
-      id: 'mastra-storage',
-      url: 'file:./mastra.db',
-    }),
-    domains: {
-      observability: await new DuckDBStore().getStore('observability'),
-    },
-  }),
+  storage,
   logger: new PinoLogger({
     name: 'Mastra',
     level: 'info',
