@@ -21,7 +21,7 @@
     "node": ">=22.13.0"
   },
   "dependencies": {
-    "@mastra/core": "^1.36.0",
+    "@mastra/core": "1.37.0",
     "@mastra/duckdb": "^1.4.0",
     "@mastra/evals": "^1.2.2",
     "@mastra/libsql": "^1.11.1",
