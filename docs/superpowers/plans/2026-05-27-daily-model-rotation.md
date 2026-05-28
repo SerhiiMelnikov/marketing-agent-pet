@@ -14,12 +14,12 @@
 
 ## File Structure
 
-| File | Change |
-| --- | --- |
-| `.gitignore` | Modify — add `data/` |
-| `src/lib/model/daily-model.ts` | Create — scheduler + fetcher + persistence |
-| `src/lib/model/model-router.ts` | Modify — `model(role)` returns a thunk; consult `getDailyModel()` first |
-| `src/mastra/index.ts` | Modify — call `startDailyModelScheduler()` after `searchInit()` / `fetchInit()` |
+| File                            | Change                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------- |
+| `.gitignore`                    | Modify — add `data/`                                                            |
+| `src/lib/model/daily-model.ts`  | Create — scheduler + fetcher + persistence                                      |
+| `src/lib/model/model-router.ts` | Modify — `model(role)` returns a thunk; consult `getDailyModel()` first         |
+| `src/mastra/index.ts`           | Modify — call `startDailyModelScheduler()` after `searchInit()` / `fetchInit()` |
 
 No test files (project has no test framework today). Verification is via `tsc --noEmit`, `npm run build`, and a manual `node -e` smoke check.
 
@@ -28,6 +28,7 @@ No test files (project has no test framework today). Verification is via `tsc --
 ### Task 1: Ignore the runtime state directory
 
 **Files:**
+
 - Modify: `.gitignore`
 
 - [ ] **Step 1: Add `data/` to .gitignore**
@@ -70,6 +71,7 @@ EOF
 ### Task 2: Create the daily-model module
 
 **Files:**
+
 - Create: `src/lib/model/daily-model.ts`
 
 - [ ] **Step 1: Write the module**
@@ -127,11 +129,7 @@ export async function refreshDailyModel(): Promise<void> {
     const tmp = `${STATE_FILE}.tmp`;
     await writeFile(
       tmp,
-      JSON.stringify(
-        { id: top.id, name: top.name, updatedAt: new Date().toISOString() },
-        null,
-        2,
-      ),
+      JSON.stringify({ id: top.id, name: top.name, updatedAt: new Date().toISOString() }, null, 2),
       'utf8',
     );
     await rename(tmp, STATE_FILE);
@@ -183,11 +181,13 @@ Expected: no output (clean). The module is currently unused, so it's checked but
 - [ ] **Step 3: Smoke-test the fetch + persist path**
 
 Run:
+
 ```bash
 node --experimental-strip-types -e "import('./src/lib/model/daily-model.ts').then(async (m) => { await m.refreshDailyModel(); console.log('current:', m.getDailyModel()); })"
 ```
 
 Expected output (one of):
+
 - Success path: `Daily model refreshed: <name> (openrouter/<id>)` followed by `current: openrouter/<id>`, and `data/daily-model.json` exists.
 - Failure path (no internet, endpoint down): `Failed to refresh daily model: <reason> — keeping current value` followed by `current: null`. No `data/daily-model.json` written.
 
@@ -222,6 +222,7 @@ EOF
 ### Task 3: Make `model(role)` return a thunk that consults the daily model
 
 **Files:**
+
 - Modify: `src/lib/model/model-router.ts`
 
 - [ ] **Step 1: Read the file**
@@ -232,11 +233,13 @@ Note the current `model(role)` signature: `(role: ModelRole): OpenRouterModel`.
 - [ ] **Step 2: Edit the import block**
 
 Locate the existing import line:
+
 ```ts
 import { env } from '../../config/env';
 ```
 
 Replace it with:
+
 ```ts
 import { env } from '../../config/env';
 import { getDailyModel } from './daily-model';
@@ -245,6 +248,7 @@ import { getDailyModel } from './daily-model';
 - [ ] **Step 3: Change the `model()` function**
 
 Locate the existing function (exact text):
+
 ```ts
 export function model(role: ModelRole): OpenRouterModel {
   return OVERRIDES[role] ?? DEFAULT_MODELS[role];
@@ -252,6 +256,7 @@ export function model(role: ModelRole): OpenRouterModel {
 ```
 
 Replace with:
+
 ```ts
 export function model(role: ModelRole): () => OpenRouterModel {
   return () => getDailyModel() ?? OVERRIDES[role] ?? DEFAULT_MODELS[role];
@@ -294,6 +299,7 @@ EOF
 ### Task 4: Start the scheduler in the Mastra entry
 
 **Files:**
+
 - Modify: `src/mastra/index.ts`
 
 - [ ] **Step 1: Read the file**
@@ -304,12 +310,14 @@ Verify the existing `searchInit()` and `fetchInit()` calls are present.
 - [ ] **Step 2: Add the import**
 
 Locate the existing import lines for searchInit/fetchInit. They look like:
+
 ```ts
 import { init as searchInit } from '../modules/search';
 import { init as fetchInit } from '../modules/fetch';
 ```
 
 Add this line immediately after them:
+
 ```ts
 import { startDailyModelScheduler } from '../lib/model/daily-model';
 ```
@@ -317,12 +325,14 @@ import { startDailyModelScheduler } from '../lib/model/daily-model';
 - [ ] **Step 3: Call the scheduler**
 
 Locate:
+
 ```ts
 searchInit();
 fetchInit();
 ```
 
 Change to:
+
 ```ts
 searchInit();
 fetchInit();
@@ -379,6 +389,7 @@ Confirm `.env` contains a real `OPENROUTER_API_KEY=sk-or-...` (generated at http
 Run: `npm run dev`
 
 Watch the console. Within ~15 seconds of startup you should see one of:
+
 - `No persisted daily model — will fetch on first opportunity` followed shortly by `Daily model refreshed: <name> (openrouter/<id>)` — first-boot success path.
 - `Loaded persisted daily model: openrouter/<id>` — subsequent-boot path (only after a prior successful fetch).
 - `Failed to refresh daily model: <reason> — keeping current value` — endpoint or network failure; expected to fall back to hardcoded defaults.
@@ -386,10 +397,13 @@ Watch the console. Within ~15 seconds of startup you should see one of:
 - [ ] **Step 3: Confirm the state file**
 
 In another terminal:
+
 ```bash
 cat data/daily-model.json
 ```
+
 Expected (after a successful refresh): JSON with `id`, `name`, and `updatedAt` fields. Example:
+
 ```json
 {
   "id": "google/gemini-flash-1.5",

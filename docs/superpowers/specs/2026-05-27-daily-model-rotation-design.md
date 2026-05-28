@@ -26,11 +26,11 @@ Three changes:
 
 **Exports:**
 
-| Function                       | Purpose                                                                                            |
-| ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `startDailyModelScheduler()`   | Called once from `src/mastra/index.ts` at boot. Loads persisted state, fetches if stale, schedules `setInterval` every 24h. |
-| `getDailyModel()`              | Returns the current in-memory `OpenRouterModel \| null`. Synchronous, no I/O.                       |
-| `refreshDailyModel()`          | Performs one fetch + validate + persist cycle. Exported for testability / manual triggering.       |
+| Function                     | Purpose                                                                                                                     |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `startDailyModelScheduler()` | Called once from `src/mastra/index.ts` at boot. Loads persisted state, fetches if stale, schedules `setInterval` every 24h. |
+| `getDailyModel()`            | Returns the current in-memory `OpenRouterModel \| null`. Synchronous, no I/O.                                               |
+| `refreshDailyModel()`        | Performs one fetch + validate + persist cycle. Exported for testability / manual triggering.                                |
 
 **Internal state:** a single module-level `let currentDailyModel: OpenRouterModel | null = null`.
 
@@ -85,10 +85,14 @@ Validated by Zod:
 
 ```ts
 const responseSchema = z.object({
-  models: z.array(z.object({
-    id: z.string().regex(/^[^/]+\/.+$/),
-    name: z.string(),
-  })).min(1),
+  models: z
+    .array(
+      z.object({
+        id: z.string().regex(/^[^/]+\/.+$/),
+        name: z.string(),
+      }),
+    )
+    .min(1),
 });
 ```
 
@@ -130,13 +134,13 @@ No persisted file, no in-memory value, the background fetch is still in flight â
 
 ## File changes summary
 
-| File                                  | Change                                                    |
-| ------------------------------------- | --------------------------------------------------------- |
-| `src/lib/model/daily-model.ts`        | **New.** Scheduler, fetcher, in-memory state, persistence. |
-| `src/lib/model/model-router.ts`       | `model(role)` return type changes to `() => OpenRouterModel`. |
-| `src/mastra/index.ts`                 | Add `startDailyModelScheduler()` after `searchInit()` / `fetchInit()`. |
-| `.gitignore`                          | Add `data/` so per-machine state doesn't leak.            |
-| `data/daily-model.json`               | **New** at runtime; not committed.                        |
+| File                            | Change                                                                 |
+| ------------------------------- | ---------------------------------------------------------------------- |
+| `src/lib/model/daily-model.ts`  | **New.** Scheduler, fetcher, in-memory state, persistence.             |
+| `src/lib/model/model-router.ts` | `model(role)` return type changes to `() => OpenRouterModel`.          |
+| `src/mastra/index.ts`           | Add `startDailyModelScheduler()` after `searchInit()` / `fetchInit()`. |
+| `.gitignore`                    | Add `data/` so per-machine state doesn't leak.                         |
+| `data/daily-model.json`         | **New** at runtime; not committed.                                     |
 
 ## Environment
 
