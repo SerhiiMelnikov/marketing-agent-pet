@@ -1,14 +1,22 @@
 import { z } from 'zod';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import type { OpenRouterModel } from './openrouter-model';
-import { ENDPOINT, FETCH_TIMEOUT_MS, STATE_FILE, REFRESH_INTERVAL_MS } from './constants';
+import { type OpenRouterModel, toOpenRouterId } from './openrouter-model';
+import {
+  ENDPOINT,
+  MODEL_EXPR,
+  FETCH_TIMEOUT_MS,
+  REFRESH_INTERVAL_MS,
+  STATE_FILE,
+  FILE_ENCODING,
+} from './constants';
+import { getErrMsg } from '../../utils/errors';
 
 const responseSchema = z.object({
   models: z
     .array(
       z.object({
-        id: z.string().regex(/^[^/]+\/.+$/),
+        id: z.string().regex(MODEL_EXPR),
         name: z.string(),
       }),
     )
@@ -16,61 +24,78 @@ const responseSchema = z.object({
 });
 
 const persistedSchema = z.object({
-  id: z.string().regex(/^[^/]+\/.+$/),
+  id: z.string().regex(MODEL_EXPR),
   name: z.string(),
   updatedAt: z.iso.datetime(),
 });
+
+type Model = {
+  id: OpenRouterModel;
+  name: string;
+};
 
 let currentDailyModel: OpenRouterModel | null = null;
 
 export const getDailyModel = () => currentDailyModel;
 
-export async function refreshDailyModel() {
-  try {
-    const res = await fetch(ENDPOINT, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
-    }
-    const json: unknown = await res.json();
-    const parsed = responseSchema.parse(json);
-    const top = parsed.models[0];
-    const rawId = top.id.replace(/^openrouter\//, '');
-    const fullId = `openrouter/${rawId}` as OpenRouterModel;
+async function fetchModel(): Promise<Model> {
+  const res = await fetch(ENDPOINT, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
 
-    await mkdir(dirname(STATE_FILE), { recursive: true });
-    const tmp = `${STATE_FILE}.tmp`;
-    await writeFile(
-      tmp,
-      JSON.stringify({ id: rawId, name: top.name, updatedAt: new Date().toISOString() }, null, 2),
-      'utf8',
-    );
-    await rename(tmp, STATE_FILE);
-
-    currentDailyModel = fullId;
-
-    console.info(`Daily model refreshed: ${top.name} (${fullId})`);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.warn(`Failed to refresh daily model: ${msg} — keeping current value`);
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
   }
+
+  const json: unknown = await res.json();
+  const { models: [top] } = responseSchema.parse(json);
+  
+  return {
+    id: toOpenRouterId(top.id),
+    name: top.name,
+  };
+}
+
+async function persist(model: Model) {
+  const tmp = `${STATE_FILE}.tmp`;
+  
+  await mkdir(dirname(STATE_FILE), { recursive: true });
+  await writeFile(
+    tmp,
+    JSON.stringify({ ...model, updatedAt: new Date().toISOString() }, null, 2),
+    FILE_ENCODING,
+  );
+  await rename(tmp, STATE_FILE);
 }
 
 async function loadPersisted(): Promise<z.infer<typeof persistedSchema> | null> {
   try {
-    const raw = await readFile(STATE_FILE, 'utf8');
-    return persistedSchema.parse(JSON.parse(raw));
+    const raw = await readFile(STATE_FILE, FILE_ENCODING);
+    const json: unknown = JSON.parse(raw);
+
+    return persistedSchema.parse(json);
   } catch {
     return null;
   }
 }
 
-export function startDailyModelScheduler(): void {
+export async function refreshDailyModel(): Promise<void> {
+  try {
+    const model = await fetchModel();
+
+    await persist(model);
+    currentDailyModel = model.id;
+    console.info(`Daily model refreshed: ${model.name} (${model.id})`);
+  } catch (err) {
+    console.warn(`Failed to refresh daily model: ${getErrMsg(err)} — keeping current value`);
+  }
+}
+
+export function startDailyModelScheduler() {
   void (async () => {
     const persisted = await loadPersisted();
+
     if (persisted) {
-      const rawId = persisted.id.replace(/^openrouter\//, '');
-      currentDailyModel = `openrouter/${rawId}` as OpenRouterModel;
-      console.info(`Loaded persisted daily model: openrouter/${rawId}`);
+      currentDailyModel = toOpenRouterId(persisted.id);
+      console.info(`Loaded persisted daily model: ${currentDailyModel}`);
     } else {
       console.info('No persisted daily model — will fetch on first opportunity');
     }
