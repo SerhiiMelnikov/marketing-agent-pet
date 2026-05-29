@@ -1,4 +1,5 @@
 import { createScorer } from '@mastra/core/evals';
+import { extractReportText } from './extract-report-text';
 
 function extractDomains(text: string): string[] {
   const urls = text.match(/https?:\/\/[^\s)\]】"']+/g) ?? [];
@@ -19,7 +20,7 @@ export const sourceDiversityScorer = createScorer({
   id: 'source-diversity',
   description: 'Rewards reports that triangulate across multiple independent sources',
 })
-  .preprocess(({ run }) => extractDomains(String(run.output ?? '')))
+  .preprocess(({ run }) => extractDomains(extractReportText(run.output)))
   .generateScore(({ results }) => {
     const domains = results.preprocessStepResult;
 

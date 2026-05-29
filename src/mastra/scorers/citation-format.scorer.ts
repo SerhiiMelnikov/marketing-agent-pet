@@ -1,11 +1,12 @@
 import { createScorer } from '@mastra/core/evals';
+import { extractReportText } from './extract-report-text';
 
 export const citationFormatScorer = createScorer({
   id: 'citation-format',
   description: 'Penalizes raw JSON or malformed citations leaking into the report',
 })
   .generateScore(({ run }) => {
-    const output = String(run.output ?? '');
+    const output = extractReportText(run.output);
     const jsonCitationLeak = /【?\{?["']?source["']?\s*:/.test(output);
     const rawBracketObjects = /【.*\{.*\}.*】/.test(output);
 

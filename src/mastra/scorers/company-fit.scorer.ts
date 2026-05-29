@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { createScorer } from '@mastra/core/evals';
 import { model } from '../../modules/model';
 import { ModelRole } from '../../modules/model';
+import { extractReportText } from './extract-report-text';
 
 export const companyFitScorer = createScorer({
   id: 'company-fit',
@@ -26,7 +27,7 @@ export const companyFitScorer = createScorer({
       `
 A research report was produced for THIS company brief:
 """
-${run.input}
+${extractReportText(run.input)}
 """
 
 Evaluate whether the report below actually TAILORS its analysis to this specific
@@ -35,7 +36,7 @@ outsourcer. Answer each boolean honestly.
 
 Report:
 """
-${run.output}
+${extractReportText(run.output)}
 """
     `.trim(),
   })

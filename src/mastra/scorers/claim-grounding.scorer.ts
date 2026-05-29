@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createScorer } from '@mastra/core/evals';
 import { model, ModelRole } from '../../modules/model';
+import { extractReportText } from './extract-report-text';
 
 export const claimGroundingScorer = createScorer({
   id: 'claim-grounding',
@@ -40,7 +41,7 @@ Do not invent claims. Only extract what is actually present.
 
 Report:
 """
-${run.output}
+${extractReportText(run.output)}
 """
     `.trim(),
   })

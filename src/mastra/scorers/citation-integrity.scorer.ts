@@ -1,4 +1,5 @@
 import { createScorer } from '@mastra/core/evals';
+import { extractReportText } from './extract-report-text';
 
 function extractUrls(text: string): string[] {
   const matches = text.match(/https?:\/\/[^\s)\]】"'<>]+/g) ?? [];
@@ -23,7 +24,7 @@ export const citationIntegrityScorer = createScorer({
     'Checks that every URL cited inline also appears in the Sources section, and reports orphan/unused sources',
 })
   .preprocess(({ run }) => {
-    const report = String(run.output ?? '');
+    const report = extractReportText(run.output);
     const { body, sources } = splitBodyAndSources(report);
 
     const inlineUrls = new Set(extractUrls(body));
