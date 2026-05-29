@@ -73,6 +73,8 @@ async function persist(model: Model) {
 
 async function loadPersisted(): Promise<z.infer<typeof persistedSchema> | null> {
   try {
+    log.info(`Loading daily model from ${STATE_FILE}`);
+
     const raw = await readFile(STATE_FILE, FILE_ENCODING);
     const json: unknown = JSON.parse(raw);
 
