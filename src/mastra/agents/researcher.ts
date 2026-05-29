@@ -218,14 +218,17 @@ follow logically from what IS in working memory and the cited sections above.
     },
     companyFit: {
       scorer: companyFitScorer,
-      sampling: { type: 'ratio', rate: 1 },
+      sampling: { type: 'ratio', rate: 0.3 },
     },
     claimGrounding: {
       scorer: claimGroundingScorer,
-      sampling: { type: 'ratio', rate: 1 },
+      sampling: { type: 'ratio', rate: 0.3 },
     },
   },
   defaultOptions: {
     maxSteps: 25,
+    modelSettings: {
+      maxRetries: 6,
+    },
   },
 });
