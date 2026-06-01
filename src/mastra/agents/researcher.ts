@@ -243,11 +243,11 @@ follow logically from what IS in working memory and the cited sections above.
     },
     companyFit: {
       scorer: companyFitScorer,
-      sampling: { type: 'ratio', rate: 0.3 },
+      sampling: { type: 'ratio', rate: 1 },
     },
     claimGrounding: {
       scorer: claimGroundingScorer,
-      sampling: { type: 'ratio', rate: 0.3 },
+      sampling: { type: 'ratio', rate: 1 },
     },
   },
   defaultOptions: {
