@@ -4,8 +4,10 @@ import type {
   ProcessorMessageResult,
 } from '@mastra/core/processors';
 import { hasLeakedToolCall } from '../scorers/extract-report-text';
+import { logger } from '../../utils/logger';
 
 const ID = 'tool-call-leak-recovery';
+const log = logger.child({ module: ID });
 
 /**
  * Detects when a model emits a tool call as text content (Gemma-style
@@ -30,7 +32,19 @@ export class ToolCallLeakRecoveryProcessor implements Processor<typeof ID> {
     messages,
   }: ProcessOutputStepArgs): ProcessorMessageResult {
     if (!text || !hasLeakedToolCall(text)) return messages;
-    if (retryCount >= this.maxRetries) return messages;
+
+    const headSample = text.slice(0, 160).replace(/\s+/g, ' ');
+
+    if (retryCount >= this.maxRetries) {
+      log.warn(
+        `Leaked tool call detected; retry budget exhausted (${retryCount}/${this.maxRetries}) — letting output through. Head: ${headSample}`,
+      );
+      return messages;
+    }
+
+    log.warn(
+      `Leaked tool call detected (retry ${retryCount + 1}/${this.maxRetries}); asking model to retry. Head: ${headSample}`,
+    );
 
     return abort(
       'Your previous response contained text that looked like a function call ' +
