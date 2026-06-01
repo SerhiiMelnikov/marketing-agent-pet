@@ -10,6 +10,7 @@ import { sourceDiversityScorer } from '../scorers/source-diversity.scorer';
 import { citationIntegrityScorer } from '../scorers/citation-integrity.scorer';
 import { companyFitScorer } from '../scorers/company-fit.scorer';
 import { claimGroundingScorer } from '../scorers/claim-grounding.scorer';
+import { ToolCallLeakRecoveryProcessor } from '../processors/tool-call-leak-recovery.processor';
 
 export const researcher = new Agent({
   id: 'vertical-researcher',
@@ -228,6 +229,7 @@ follow logically from what IS in working memory and the cited sections above.
   model: model(ModelRole.Synthesizer),
   tools: { webSearchTool, fetchTool },
   memory: researchMemory,
+  outputProcessors: [new ToolCallLeakRecoveryProcessor()],
   scorers: {
     citationFormat: {
       scorer: citationFormatScorer,
