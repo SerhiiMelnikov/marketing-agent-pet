@@ -1,11 +1,6 @@
 import { createScorer } from '@mastra/core/evals';
 import { INCOMPLETE_MSG, preprocessRun } from './extract-report-text';
-
-function extractUrls(text: string): string[] {
-  const matches = text.match(/https?:\/\/[^\s)\]】"'<>]+/g) ?? [];
-
-  return matches.map((u) => u.replace(/[.,;]+$/, ''));
-}
+import { extractUrls } from './utils';
 
 function splitBodyAndSources(report: string): { body: string; sources: string } {
   const match = report.match(/^#{1,6}\s*sources?\s*$/im);

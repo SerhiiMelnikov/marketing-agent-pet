@@ -1,20 +1,6 @@
 import { createScorer } from '@mastra/core/evals';
 import { INCOMPLETE_MSG, preprocessRun } from './extract-report-text';
-
-function extractDomains(text: string): string[] {
-  const urls = text.match(/https?:\/\/[^\s)\]】"']+/g) ?? [];
-  const domains = urls
-    .map((u) => {
-      try {
-        return new URL(u).hostname.replace(/^www\./, '');
-      } catch {
-        return '';
-      }
-    })
-    .filter(Boolean);
-
-  return [...new Set(domains)];
-}
+import { extractDomains } from './utils';
 
 export const sourceDiversityScorer = createScorer({
   id: 'source-diversity',
