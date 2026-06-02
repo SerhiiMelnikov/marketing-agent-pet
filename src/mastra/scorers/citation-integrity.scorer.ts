@@ -64,9 +64,7 @@ export const citationIntegrityScorer = createScorer({
   .generateReason(({ results, score }) => {
     const p = results.preprocessStepResult;
 
-    if (!p.isComplete) {
-      return INCOMPLETE_MSG;
-    }
+    if (!p.isComplete) return INCOMPLETE_MSG;
     if (!p.hasSourcesSection) return 'No Sources section found in the report.';
     if (p.inlineCount === 0) return 'Report makes claims but cites no sources inline.';
 
@@ -74,7 +72,9 @@ export const citationIntegrityScorer = createScorer({
 
     if (p.orphanCitations.length) {
       parts.push(
-        `${p.orphanCitations.length} inline citation(s) not in Sources: ${p.orphanCitations.slice(0, 3).join(', ')}${p.orphanCitations.length > 3 ? '…' : ''}.`,
+        `${p.orphanCitations.length} inline citation(s) not in Sources: ${p.orphanCitations
+          .slice(0, 3)
+          .join(', ')}${p.orphanCitations.length > 3 ? '…' : ''}.`,
       );
     }
     if (p.unusedSources.length) {

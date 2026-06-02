@@ -10,6 +10,7 @@ export const citationFormatScorer = createScorer({
   .preprocess(({ run }) => preprocessRun(run))
   .generateScore(({ results }) => {
     const { text, isComplete } = results.preprocessStepResult;
+
     if (!isComplete) return 0;
 
     const jsonCitationLeak = /【?\{?["']?source["']?\s*:/.test(text);
@@ -21,6 +22,7 @@ export const citationFormatScorer = createScorer({
     if (!results.preprocessStepResult.isComplete) {
       return INCOMPLETE_MSG;
     }
+
     return score
       ? 'Citations are clean.'
       : 'Report contains raw JSON/serialized citations instead of clean references.';

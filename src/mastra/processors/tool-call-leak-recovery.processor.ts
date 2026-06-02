@@ -39,6 +39,7 @@ export class ToolCallLeakRecoveryProcessor implements Processor<typeof ID> {
       log.warn(
         `Leaked tool call detected; retry budget exhausted (${retryCount}/${this.maxRetries}) — letting output through. Head: ${headSample}`,
       );
+
       return messages;
     }
 

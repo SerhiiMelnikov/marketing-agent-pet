@@ -1,4 +1,3 @@
-
 export interface ScorerPreprocessBase {
   /** The agent's final assistant text, extracted from the message-list payload. */
   text: string;

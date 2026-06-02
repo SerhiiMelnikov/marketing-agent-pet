@@ -9,6 +9,7 @@ export const sourceDiversityScorer = createScorer({
 })
   .preprocess(({ run }) => {
     const base = preprocessRun(run);
+
     return {
       isComplete: base.isComplete,
       domains: base.isComplete ? extractDomains(base.text) : [],

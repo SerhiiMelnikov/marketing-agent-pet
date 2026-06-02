@@ -9,6 +9,22 @@ import {
   TOOL_CALL_LEAK_PATTERNS,
 } from '../constants';
 
+function textFromParts(parts: MastraMessagePart[]) {
+  let out = '';
+
+  for (const part of parts) {
+    if (part.type === 'text') out += part.text;
+  }
+
+  return out;
+}
+
+function extractMessageText(message: MastraDBMessage) {
+  const { content: flat, parts } = message.content;
+
+  return typeof flat === 'string' && flat.length ? flat : textFromParts(parts);
+}
+
 /**
  * Concatenate the user-visible text of a Mastra DB message list. Mastra
  * populates `content.content` (the AI SDK v4 flat string) on real outputs,
@@ -17,24 +33,8 @@ import {
  * Other part types (tool invocations, step starts, sources, reasoning) are
  * dropped — scorers evaluate the final response, not the trajectory.
  */
-export function extractReportText(messages: MastraDBMessage[] | undefined): string {
-  if (!messages) return '';
-  return messages.map(extractMessageText).filter(Boolean).join('\n\n');
-}
-
-function extractMessageText(message: MastraDBMessage): string {
-  const flat = message.content.content;
-  if (typeof flat === 'string' && flat.length > 0) return flat;
-  return textFromParts(message.content.parts);
-}
-
-function textFromParts(parts: MastraMessagePart[]): string {
-  let out = '';
-  for (const part of parts) {
-    if (part.type === 'text') out += part.text;
-  }
-  return out;
-}
+export const extractReportText = (messages: MastraDBMessage[] | undefined) =>
+  messages?.map(extractMessageText).filter(Boolean).join('\n\n') ?? '';
 
 /**
  * Shared per-run preprocessing for scorers.
@@ -54,8 +54,10 @@ export function preprocessRun(run: {
   output?: ScorerRunOutputForAgent;
 }): ScorerPreprocessBase {
   const cacheKey = run.output ?? null;
+
   if (cacheKey) {
     const cached = preprocessCache.get(cacheKey);
+
     if (cached) return cached;
   }
 
@@ -85,21 +87,20 @@ export function preprocessRun(run: {
  * LLM-judge scorers) cut judge cost by ~98% via a minimal skip prompt.
  */
 export function isFinalReport(text: string): boolean {
-  if (!text || text.length < MIN_REPORT_LENGTH) return false;
-  if (GARBAGE_PATTERNS.some((p) => p.test(text))) return false;
+  const matches = (p: RegExp) => p.test(text);
 
-  const sectionHits = EXPECTED_SECTION_PATTERNS.filter((p) => p.test(text)).length;
-  return sectionHits >= MIN_SECTION_HITS;
+  return (
+    text.length > MIN_REPORT_LENGTH &&
+    !GARBAGE_PATTERNS.some(matches) &&
+    EXPECTED_SECTION_PATTERNS.filter(matches).length >= MIN_SECTION_HITS
+  );
 }
 
 // Strip code fences so a legit `<tool_call>` inside a code example doesn't
 // trigger a false retry — only leaked tool-call markup in the model's own
 // prose should count.
-function stripFencedCode(text: string): string {
-  return text.replace(/```[\s\S]*?```/g, '').replace(/~~~[\s\S]*?~~~/g, '');
-}
+const stripFencedCode = (text: string) =>
+  text.replace(/```[\s\S]*?```/g, '').replace(/~~~[\s\S]*?~~~/g, '');
 
-export function hasLeakedToolCall(text: string): boolean {
-  if (!text) return false;
-  return TOOL_CALL_LEAK_PATTERNS.some((p) => p.test(stripFencedCode(text)));
-}
+export const hasLeakedToolCall = (text: string) =>
+  !!text && TOOL_CALL_LEAK_PATTERNS.some((p) => p.test(stripFencedCode(text)));
