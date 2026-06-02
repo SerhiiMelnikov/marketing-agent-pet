@@ -3,7 +3,7 @@ import { createTool } from '@mastra/core/tools';
 import { fetchUrl } from '../../modules/fetch';
 import { BlockReason } from '../../modules/fetch';
 import { logger } from '../../utils/logger';
-import { DEFAULT_BUDGET_CHARS, relevanceRank } from './relevance-rank';
+import { DEFAULT_BUDGET_CHARS, relevanceRank } from '../../modules/relevance-rank';
 
 const log = logger.child({ module: 'fetch-tool' });
 
