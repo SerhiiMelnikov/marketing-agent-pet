@@ -1,18 +1,12 @@
 import { env } from '../../config/env';
-import { getDailyModel } from './daily-model';
 import { ModelRole } from './model-role.enum';
-import type { MastraModelId } from './mastra-model-id';
+import type { MastraModelId } from './types';
 
 export { ModelRole } from './model-role.enum';
-export type { OpenRouterModel } from './openrouter-model';
-export { openRouterModelSchema } from './openrouter-model';
-export type { MastraModelId } from './mastra-model-id';
+export type { MastraModelId } from './types';
 export { mastraModelIdSchema, mastraModelIdPoolSchema } from './mastra-model-id';
-export { getDailyModel, refreshDailyModel, startDailyModelScheduler } from './daily-model';
 
-type RoleModelMap = Record<ModelRole, MastraModelId>;
-
-const DEFAULT_MODELS: RoleModelMap = {
+const DEFAULT_MODELS: Record<ModelRole, MastraModelId> = {
   researcher: 'openrouter/anthropic/claude-sonnet-4.5',
   synthesizer: 'openrouter/anthropic/claude-opus-4.7',
   cheap: 'openrouter/google/gemini-2.5-flash',
@@ -41,10 +35,12 @@ const counters: Record<ModelRole, number> = {
 
 function pickFromPool(role: ModelRole): MastraModelId | null {
   const pool = POOLS[role];
-  if (!pool || pool.length === 0) return null;
+
+  if (!pool?.length) return null;
 
   const idx = counters[role] % pool.length;
   counters[role] += 1;
+
   return pool[idx];
 }
 
@@ -56,24 +52,20 @@ function pickFromPool(role: ModelRole): MastraModelId | null {
  *   3. Hardcoded default
  */
 export const model = (role: ModelRole) => (): MastraModelId =>
-  pickFromPool(role) ?? getDailyModel() ?? DEFAULT_MODELS[role];
+  pickFromPool(role) ?? DEFAULT_MODELS[role];
+
+const describe = (role: ModelRole) => {
+  const pool = POOLS[role];
+
+  return pool?.length ? `pool: [${pool.join(', ')}]` : DEFAULT_MODELS[role];
+};
 
 /**
  * Human-readable view of what's configured for each role. Pools are
  * rendered as their full member list; daily / default show as a single id.
  */
-export const describeModels = () => {
-  const daily = getDailyModel();
-  const describe = (role: ModelRole): string => {
-    const pool = POOLS[role];
-    if (pool && pool.length > 0) return `pool: [${pool.join(', ')}]`;
-
-    return daily ?? DEFAULT_MODELS[role];
-  };
-
-  return {
-    researcher: describe(ModelRole.Researcher),
-    synthesizer: describe(ModelRole.Synthesizer),
-    cheap: describe(ModelRole.Cheap),
-  };
-};
+export const describeModels = () => ({
+  researcher: describe(ModelRole.Researcher),
+  synthesizer: describe(ModelRole.Synthesizer),
+  cheap: describe(ModelRole.Cheap),
+});
