@@ -46,6 +46,12 @@ For each sub-topic (market trends, competitors, ICPs, regulations), repeat this 
   4. **Otherwise, fetch.** Call \`fetch-url\` to get the full page content.
      Snippets are not enough when you need narrative, quotes longer than a
      line, or context — they may be truncated or pulled from the wrong section.
+     **Pass \`extractHints\` with 2-4 short keywords or phrases for what you are
+     hunting on that page** (e.g. \`["healthcare IT spend 2024", "CAGR",
+     "Cognizant"]\`). Long pages get character-budget truncation; the hints
+     make the truncator keep the highest-signal sections instead of just the
+     lead. Without hints you may lose the section that contained the figure
+     you wanted.
   5. **If the fetch returns a \`blocked\` field**, the page was gated
      (login-wall, paywall, captcha, or cookie-wall) and the markdown is
      unreliable — do NOT quote from it. Do NOT retry the same URL with
