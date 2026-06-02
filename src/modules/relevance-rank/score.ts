@@ -1,5 +1,8 @@
 import { NUMERIC_SIGNAL } from './constants';
 
+const matchCount = (text: string, pattern: RegExp) => (text.match(pattern) ?? []).length;
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Score a chunk against a list of hint keywords/phrases. Exact phrase hits
  * weigh 5×; individual content words (longer than 3 chars) weigh 1×.
@@ -11,6 +14,7 @@ export function scoreChunk(chunk: string, hints: string[]): number {
 
   for (const hint of hints) {
     const h = hint.toLowerCase();
+
     score += matchCount(lower, new RegExp(escapeRegex(h), 'g')) * 5;
     for (const word of h.split(/\s+/).filter((w) => w.length > 3)) {
       score += matchCount(lower, new RegExp(`\\b${escapeRegex(word)}\\b`, 'g'));
@@ -18,13 +22,6 @@ export function scoreChunk(chunk: string, hints: string[]): number {
   }
 
   score += matchCount(chunk, NUMERIC_SIGNAL) * 2;
+
   return score;
-}
-
-function matchCount(text: string, pattern: RegExp): number {
-  return (text.match(pattern) ?? []).length;
-}
-
-function escapeRegex(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

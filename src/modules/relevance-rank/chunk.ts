@@ -8,9 +8,11 @@ export function chunkByHeadings(md: string): string[] {
     .split(/(?=^#{1,2}\s)/m)
     .map((s) => s.trim())
     .filter(Boolean);
-  if (sections.length > 1) return sections;
-  return md
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+
+  return sections.length > 1
+    ? sections
+    : md
+        .split(/\n{2,}/)
+        .map((p) => p.trim())
+        .filter(Boolean);
 }

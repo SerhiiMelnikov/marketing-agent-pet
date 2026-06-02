@@ -19,7 +19,5 @@ export function relevanceRank(
   if (markdown.length <= budgetChars) return markdown;
 
   const chunks = chunkByHeadings(markdown);
-  return hints?.length
-    ? packByScore(chunks, hints, budgetChars)
-    : packInOrder(chunks, budgetChars);
+  return hints?.length ? packByScore(chunks, hints, budgetChars) : packInOrder(chunks, budgetChars);
 }
