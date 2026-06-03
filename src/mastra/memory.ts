@@ -1,5 +1,8 @@
+// src/mastra/memory.ts
+
 import { Memory } from '@mastra/memory';
 import { storage } from './storage';
+import { researchMemorySchema } from './schemas/research-memory';
 
 export const researchMemory = new Memory({
   storage,
@@ -7,15 +10,7 @@ export const researchMemory = new Memory({
     workingMemory: {
       enabled: true,
       scope: 'thread',
-      template: `
-# Research Brief
-
-## Market Trends
-## Competitors
-## Candidate ICPs
-## Open Questions
-## Sources Consulted
-      `.trim(),
+      schema: researchMemorySchema,
     },
   },
 });
