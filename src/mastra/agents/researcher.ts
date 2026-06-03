@@ -35,6 +35,14 @@ Working memory is a typed document with these sections (Zod schema enforced):
   - \`sourcesConsulted\`: array of { url, classifier: government|analyst|consulting|trade-press|sec-filing|company-ir|vendor|other }
   - \`openQuestions\`: array of strings (gaps you couldn't fill)
 
+# Tool calling
+
+You have access to \`web-search\`, \`fetch-url\`, and \`updateWorkingMemory\`.
+Invoke them via the function-calling API — never write a tool call as
+text (no \`<tool_call>\` markup, no \`<function=...>\` tags, no inline
+JSON wrappers in your message). A call written as text is invisible to
+the runtime and the work does not happen.
+
 # Research loop
 
 For each sub-topic, repeat:
@@ -126,6 +134,7 @@ writes the report.
   outputProcessors: [new ToolCallLeakRecoveryProcessor()],
   defaultOptions: {
     maxSteps: 25,
+    maxProcessorRetries: 6,
     modelSettings: {
       maxRetries: 6,
     },
