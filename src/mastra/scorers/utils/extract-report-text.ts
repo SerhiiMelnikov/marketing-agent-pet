@@ -79,8 +79,8 @@ export function preprocessRun(run: {
 }
 
 /**
- * Heuristic check: does this text look like a completed Phase-2 research
- * report, or like an interrupted/stuck/garbage agent run?
+ * Heuristic check: does this text look like a completed synthesizer report,
+ * or like an interrupted/stuck/garbage agent run?
  *
  * Reports that pass the check are evaluated by all scorers. Reports that
  * fail short-circuit the scorer pipeline to keep dashboards clean and (for

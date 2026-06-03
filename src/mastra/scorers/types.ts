@@ -3,6 +3,6 @@ export interface ScorerPreprocessBase {
   text: string;
   /** The user brief that triggered the agent run. */
   brief: string;
-  /** Whether `text` looks like a real Phase-2 report (vs. interrupted/garbage). */
+  /** Whether `text` looks like a real synthesizer report (vs. interrupted/garbage). */
   isComplete: boolean;
 }

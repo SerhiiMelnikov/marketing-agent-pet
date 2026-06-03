@@ -31,7 +31,7 @@ export const GARBAGE_PATTERNS = [
 ];
 
 /**
- * Expected section headers in the researcher's Phase-2 report. A report must
+ * Expected section headers in the synthesizer's final report. A report must
  * hit at least `MIN_SECTION_HITS` of these to pass the `isFinalReport` gate.
  */
 export const EXPECTED_SECTION_PATTERNS = [
