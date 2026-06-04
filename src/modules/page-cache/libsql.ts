@@ -34,8 +34,10 @@ export class LibSqlPageCache implements PageCache {
     const row = res.rows[0];
     if (!row) return null;
 
-    const fetchedAt = row.fetched_at as string;
-    if (Date.now() - new Date(fetchedAt).getTime() > TTL_MS) return null;
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    const fetchedAt = String(row.fetched_at);
+    const fetchedAtMs = new Date(fetchedAt).getTime();
+    if (Number.isNaN(fetchedAtMs) || Date.now() - fetchedAtMs > TTL_MS) return null;
 
     return {
       runId: row.run_id as string,
