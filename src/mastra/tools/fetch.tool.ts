@@ -8,10 +8,11 @@ import { DEFAULT_BUDGET_CHARS, relevanceRank } from '../../modules/relevance-ran
 const log = logger.child({ module: 'fetch-tool' });
 
 const descriptions = {
-  tool: 'Fetch a single web page and return its main content as clean markdown. Use this after `web-search` when you need the full text of a result rather than just the snippet, or when an agent already has a known URL (e.g. a competitor homepage, a 10-K, an analyst report). Providers are tried in order — cheap HTTP+readability first, then Firecrawl for JS-heavy pages — so calls are best-effort and may return empty/short content for paywalls, bot walls, or dynamic apps. Long pages are truncated to a character budget; pass `extractHints` so the truncation keeps the sections most relevant to what you are looking for.',
+  tool: 'Fetch a single web page and return its main content as clean markdown. Use this after `web-search` when you need the full text of a result rather than just the snippet, or when an agent already has a known URL (e.g. a competitor homepage, a 10-K, an analyst report). Providers are tried in order — cheap HTTP+readability first, then Firecrawl for JS-heavy pages — so calls are best-effort and may return empty/short content for paywalls, bot walls, or dynamic apps. Long pages are truncated to a character budget; pass `extractHints` so the truncation keeps the sections most relevant to what you are looking for. After fetching a page, you can later search within it without re-fetching by calling `find-in-page` with the same URL and your current runId.',
 
   input: {
     url: 'Absolute URL of the page to fetch. Must be a fully qualified http(s) URL.',
+    runId: 'The current research session\'s runId — required so the page can be retrieved by `find-in-page` later in the same run without re-fetching. Use the runId given to you in the initial brief.',
     requiresJs:
       'Hint that the page is JS-heavy (an SPA, dashboard, or paywalled article) and cheap providers will likely fail. Set true to skip straight to the JS-capable provider; leave omitted to let the chain decide.',
     extractHints:
@@ -38,6 +39,7 @@ export const fetchTool = createTool({
   description: descriptions.tool,
   inputSchema: z.object({
     url: z.url().describe(descriptions.input.url),
+    runId: z.string().uuid().describe(descriptions.input.runId),
     requiresJs: z.boolean().optional().describe(descriptions.input.requiresJs),
     extractHints: z.array(z.string()).optional().describe(descriptions.input.extractHints),
   }),
@@ -56,8 +58,8 @@ export const fetchTool = createTool({
       .optional()
       .describe(descriptions.output.blocked),
   }),
-  execute: async ({ url, requiresJs, extractHints }) => {
-    const result = await fetchUrl({ url, requiresJs });
+  execute: async ({ url, runId, requiresJs, extractHints }) => {
+    const result = await fetchUrl({ url, runId, requiresJs });
     if (!result.blocked && result.markdown.length > DEFAULT_BUDGET_CHARS) {
       const original = result.markdown.length;
       result.markdown = relevanceRank(result.markdown, extractHints);

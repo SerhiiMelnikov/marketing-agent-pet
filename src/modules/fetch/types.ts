@@ -3,6 +3,7 @@ import type { FetchProviderName } from './enums/provider-name.enum';
 
 export interface FetchRequest {
   url: string;
+  runId: string;
   /** Hint that the page is JS-heavy; providers may use this to skip cheaper paths. */
   requiresJs?: boolean;
 }
@@ -30,6 +31,8 @@ export interface FetchResult {
   fetchedAt: string;
   /** Set when the page was reachable but content is gated/blocked. */
   blocked?: BlockedInfo;
+  /** True when the result came from the per-run cache, not a provider. */
+  fromCache?: boolean;
 }
 
 export interface FetchProvider {
