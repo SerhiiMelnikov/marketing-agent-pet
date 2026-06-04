@@ -6,6 +6,7 @@ import { createStep } from '@mastra/core/workflows';
 import { researcher } from '../../../agents/researcher';
 import { getProfile } from '../../../../modules/companies';
 import { env } from '../../../../config/env';
+import { getCache } from '../../../../modules/page-cache';
 
 export const briefSchema = z.object({
   vertical: z
@@ -35,7 +36,7 @@ export const runResearch = createStep({
     'Invokes the researcher agent on a fresh thread to populate working memory with structured findings',
   inputSchema: briefSchema,
   outputSchema: researchOutputSchema,
-  execute: async ({ inputData, mastra }) => {
+  execute: async ({ inputData, mastra, runId }) => {
     if (!inputData) throw new Error('Brief not provided');
 
     const companyKey = inputData.companyKey ?? env.DEFAULT_COMPANY_KEY;
@@ -59,26 +60,32 @@ Company: ${profile.name}
 Profile (verified ${profile.lastVerified}):
 ${profile.facts}
 
+Your runId for this research session is: ${runId}
+
 Populate working memory with structured findings, then emit your completion signal.
     `.trim();
 
-    const response = await agent.stream([{ role: 'user', content: prompt }], {
-      memory: { thread: threadId, resource: resourceId },
-      maxSteps: 60,
-    });
+    try {
+      const response = await agent.stream([{ role: 'user', content: prompt }], {
+        memory: { thread: threadId, resource: resourceId },
+        maxSteps: 60,
+      });
 
-    let completionSignal = '';
-    for await (const chunk of response.textStream) {
-      process.stdout.write(chunk);
-      completionSignal += chunk;
+      let completionSignal = '';
+      for await (const chunk of response.textStream) {
+        process.stdout.write(chunk);
+        completionSignal += chunk;
+      }
+
+      return {
+        threadId,
+        vertical: inputData.vertical,
+        companyName: profile.name,
+        companyFacts: profile.facts,
+        completionSignal,
+      };
+    } finally {
+      await getCache().clear(runId);
     }
-
-    return {
-      threadId,
-      vertical: inputData.vertical,
-      companyName: profile.name,
-      companyFacts: profile.facts,
-      completionSignal,
-    };
   },
 });

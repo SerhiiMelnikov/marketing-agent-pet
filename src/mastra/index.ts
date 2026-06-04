@@ -9,10 +9,12 @@ import { logger } from '../utils/logger';
 import { init as searchInit } from '../modules/search';
 import { init as fetchInit } from '../modules/fetch';
 import { init as companiesInit } from '../modules/companies';
+import { init as pageCacheInit } from '../modules/page-cache';
 import { researcher } from './agents/researcher';
 import { synthesizer } from './agents/synthesizer';
 import { webSearchTool } from './tools/web-search.tool';
 import { fetchTool } from './tools/fetch.tool';
+import { findInPageTool } from './tools/find-in-page.tool';
 import { storage } from './storage';
 import { verticalEntryWorkflow } from './workflows/vertical-entry';
 import { citationFormatScorer } from './scorers/citation-format.scorer';
@@ -24,11 +26,12 @@ import { claimGroundingScorer } from './scorers/claim-grounding.scorer';
 searchInit();
 fetchInit();
 companiesInit();
+await pageCacheInit();
 
 export const mastra = new Mastra({
   workflows: { verticalEntryWorkflow },
   agents: { researcher, synthesizer },
-  tools: { webSearchTool, fetchTool },
+  tools: { webSearchTool, fetchTool, findInPageTool },
   scorers: {
     citationFormat: citationFormatScorer,
     sourceDiversity: sourceDiversityScorer,

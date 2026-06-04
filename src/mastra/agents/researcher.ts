@@ -6,6 +6,7 @@ import { ModelRole } from '../../modules/model/model-role.enum';
 import { researchMemory } from '../memory';
 import { webSearchTool } from '../tools/web-search.tool';
 import { fetchTool } from '../tools/fetch.tool';
+import { findInPageTool } from '../tools/find-in-page.tool';
 import { ToolCallLeakRecoveryProcessor } from '../processors/tool-call-leak-recovery.processor';
 
 export const researcher = new Agent({
@@ -26,6 +27,13 @@ working-memory document with structured findings about the target vertical.
 The final report will be written by ANOTHER AGENT reading ONLY working
 memory. If a finding is not in working memory when you finish, it does not
 exist. Treat memory writes as your primary output.
+
+# runId
+
+You will be given a research-session \`runId\` in the initial brief. Pass
+that runId on every call to \`fetch-url\` and \`find-in-page\`. The cache
+is scoped to this runId; without it the runtime cannot find pages you've
+already fetched.
 
 Working memory is a typed document with these sections (Zod schema enforced):
 
@@ -62,6 +70,11 @@ For each sub-topic, repeat:
      \`["healthcare IT spend 2024", "CAGR", "Cognizant"]\`). Long pages
      get character-budget truncation; hints make the truncator keep the
      highest-signal sections instead of just the lead.
+     **Already fetched this page?** Use \`find-in-page\` with the URL +
+     your exact phrase to locate it in the previously fetched content.
+     Do NOT call \`fetch-url\` on a URL you've already fetched in this
+     run — \`find-in-page\` is the more precise way to locate a specific
+     quote inside a page you know you have.
   5. **If the fetch returns a \`blocked\` field**, do NOT quote from its
      markdown. Search again for the specific claim from the analyst's
      press release or blog (everestgrp.com/blog/, gartner.com/en/newsroom/)
@@ -129,7 +142,7 @@ NOT write a report — the workflow reads memory directly and another agent
 writes the report.
   `.trim(),
   model: model(ModelRole.Researcher),
-  tools: { webSearchTool, fetchTool },
+  tools: { webSearchTool, fetchTool, findInPageTool },
   memory: researchMemory,
   outputProcessors: [new ToolCallLeakRecoveryProcessor()],
   defaultOptions: {
