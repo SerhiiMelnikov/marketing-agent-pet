@@ -2,6 +2,7 @@ import { z } from 'zod';
 import process from 'node:process';
 import { SearchProviderName } from '../modules/search/enums/provider.enum';
 import { mastraModelIdPoolSchema } from '../modules/model/mastra-model-id';
+import { ONIX } from '../modules/companies/onix';
 
 const envSchema = z.object({
   SEARCH_PROVIDER: z.enum(SearchProviderName).default(SearchProviderName.Tavily),
@@ -17,7 +18,7 @@ const envSchema = z.object({
   MODEL_SYNTHESIZER_POOL: mastraModelIdPoolSchema,
   MODEL_CHEAP_POOL: mastraModelIdPoolSchema,
   APP_URL: z.url().optional(),
-  DEFAULT_COMPANY_KEY: z.string().min(1).optional(),
+  DEFAULT_COMPANY_KEY: z.string().min(1).default(ONIX.key),
 });
 
 export const env = envSchema.parse(process.env);

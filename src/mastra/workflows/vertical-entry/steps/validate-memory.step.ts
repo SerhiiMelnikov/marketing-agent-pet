@@ -10,7 +10,7 @@ import { researchOutputSchema } from './research.step';
 
 export const validateOutputSchema = researchOutputSchema;
 
-const MIN_TRENDS = 3;
+const MIN_TRENDS = 2;
 const MIN_COMPETITORS = 3;
 const MIN_ICPS = 2;
 const MIN_SOURCES = 5;

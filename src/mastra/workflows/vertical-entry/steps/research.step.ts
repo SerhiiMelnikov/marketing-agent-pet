@@ -64,7 +64,7 @@ Populate working memory with structured findings, then emit your completion sign
 
     const response = await agent.stream([{ role: 'user', content: prompt }], {
       memory: { thread: threadId, resource: resourceId },
-      maxSteps: 25,
+      maxSteps: 60,
     });
 
     let completionSignal = '';

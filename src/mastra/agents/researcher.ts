@@ -133,7 +133,7 @@ writes the report.
   memory: researchMemory,
   outputProcessors: [new ToolCallLeakRecoveryProcessor()],
   defaultOptions: {
-    maxSteps: 25,
+    maxSteps: 60,
     maxProcessorRetries: 6,
     modelSettings: {
       maxRetries: 6,
