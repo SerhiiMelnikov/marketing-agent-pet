@@ -28,13 +28,6 @@ The final report will be written by ANOTHER AGENT reading ONLY working
 memory. If a finding is not in working memory when you finish, it does not
 exist. Treat memory writes as your primary output.
 
-# runId
-
-You will be given a research-session \`runId\` in the initial brief. Pass
-that runId on every call to \`fetch-url\` and \`find-in-page\`. The cache
-is scoped to this runId; without it the runtime cannot find pages you've
-already fetched.
-
 Working memory is a typed document with these sections (Zod schema enforced):
 
   - \`marketTrends\`: array of { claim, evidence (quoted snippet), sourceUrl, publisher, year?, confidence: high|medium|low }

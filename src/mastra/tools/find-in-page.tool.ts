@@ -9,7 +9,6 @@ const descriptions = {
   tool:
     'Search for a specific phrase or quote within a page you have already fetched in this research run. Use this instead of re-fetching the page or running a new web search when you remember that a fetched page contains a specific fact, quote, or number, and you need to locate it precisely or verify its surrounding context. You MUST have already fetched this URL in the current run. The tool will not fetch new pages. Typical use: after fetching a long page, use find-in-page with the specific phrase you need to extract for evidence. For finding multiple distinct phrases, call the tool once per phrase.',
   input: {
-    runId: 'The current research session\'s runId. Must match the runId used for the original fetch.',
     url: 'The URL to search within. Must be a URL you have already fetched in this run.',
     query:
       'Plain-text phrase to search for. Case-insensitive substring match. For finding multiple distinct phrases, call the tool once per phrase.',
@@ -42,7 +41,6 @@ export const findInPageTool = createTool({
   id: 'find-in-page',
   description: descriptions.tool,
   inputSchema: z.object({
-    runId: z.string().uuid().describe(descriptions.input.runId),
     url: z.url().describe(descriptions.input.url),
     query: z.string().min(1).describe(descriptions.input.query),
     contextChars: z.number().int().min(50).max(2000).default(300).describe(descriptions.input.contextChars),
@@ -54,12 +52,16 @@ export const findInPageTool = createTool({
     pageMetadata: pageMetadataSchema.optional().describe(descriptions.output.pageMetadata),
     error: z.string().optional().describe(descriptions.output.error),
   }),
-  execute: async ({ runId, url, query, contextChars, maxMatches }) => {
+  execute: async ({ url, query, contextChars, maxMatches }, { requestContext }) => {
+    const runIdValue = requestContext?.get('runId');
+    if (!runIdValue || typeof runIdValue !== 'string') {
+      throw new Error('runId missing from requestContext — workflow misconfigured');
+    }
     const cache = getCache();
-    const entry = await cache.get(runId, url);
+    const entry = await cache.get(runIdValue, url);
 
     if (!entry) {
-      log.info(`miss: ${url} (run ${runId})`);
+      log.info(`miss: ${url} (run ${runIdValue})`);
       return {
         found: false,
         matches: [],
@@ -82,7 +84,7 @@ export const findInPageTool = createTool({
       cursor = idx + lowerQuery.length;
     }
 
-    log.info(`${url} (run ${runId}): "${query}" → ${matches.length} match(es)`);
+    log.info(`${url} (run ${runIdValue}): "${query}" → ${matches.length} match(es)`);
 
     return {
       found: matches.length > 0,

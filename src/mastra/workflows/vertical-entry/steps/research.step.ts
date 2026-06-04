@@ -3,6 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { createStep } from '@mastra/core/workflows';
+import { RequestContext } from '@mastra/core/request-context';
 import { researcher } from '../../../agents/researcher';
 import { getProfile } from '../../../../modules/companies';
 import { env } from '../../../../config/env';
@@ -58,13 +59,13 @@ export const runResearch = createStep({
     const threadId = randomUUID();
     const resourceId = 'default';
 
+    const requestContext = new RequestContext<{ runId: string }>([['runId', runId]]);
+
     const prompt = `
 Vertical: ${inputData.vertical}
 Company: ${profile.name}
 Profile (verified ${profile.lastVerified}):
 ${profile.facts}
-
-Your runId for this research session is: ${runId}
 
 Populate working memory with structured findings, then emit your completion signal.
     `.trim();
@@ -73,6 +74,7 @@ Populate working memory with structured findings, then emit your completion sign
       const response = await agent.stream([{ role: 'user', content: prompt }], {
         memory: { thread: threadId, resource: resourceId },
         maxSteps: 60,
+        requestContext,
       });
 
       let completionSignal = '';
