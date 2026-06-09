@@ -8,7 +8,6 @@ import {
 } from '../../../schemas/research-memory';
 import { iterationStateSchema } from './prepare-research.step';
 import { invokeResearcher } from './invoke-researcher';
-import { clearCache } from './cache-cleanup';
 
 const MIN_TRENDS = 3;
 const MIN_COMPETITORS = 3;
@@ -37,20 +36,13 @@ export const runResearchIteration = createStep({
       inputData.memoryCounts,
     );
 
-    let completionSignal: string;
-    try {
-      const result = await invokeResearcher({
-        mastra,
-        threadId: inputData.threadId,
-        resourceId: inputData.resourceId,
-        runId,
-        prompt,
-      });
-      completionSignal = result.completionSignal;
-    } catch (err) {
-      await clearCache(runId);
-      throw err;
-    }
+    const { completionSignal } = await invokeResearcher({
+      mastra,
+      threadId: inputData.threadId,
+      resourceId: inputData.resourceId,
+      runId,
+      prompt,
+    });
 
     const newMemory = await readMemory(inputData.threadId, inputData.resourceId);
 

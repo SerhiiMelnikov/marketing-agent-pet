@@ -12,21 +12,26 @@ const verticalEntryWorkflow = createWorkflow({
   id: 'vertical-entry-workflow',
   inputSchema: briefSchema,
   outputSchema: reportSchema,
+  options: {
+    onFinish: async ({ runId, status }) => {
+      // Skip on 'suspended' — that's a pause, not an end; the cache must
+      // stay warm for resume. This workflow doesn't currently suspend,
+      // but the guard protects against silent breakage if we add it.
+      if (status === 'suspended') return;
+      await clearCache(runId);
+    },
+  },
 })
   .then(prepareResearch)
-  .dountil(runResearchIteration, async ({ inputData, runId, iterationCount }) => {
-    if (inputData.deficits.length === 0) {
-      await clearCache(runId);
-      return true;
-    }
+  .dountil(runResearchIteration, ({ inputData, iterationCount }) => {
+    if (inputData.deficits.length === 0) return Promise.resolve(true);
     if (iterationCount >= MAX_ATTEMPTS) {
-      await clearCache(runId);
       throw new Error(
         `Research insufficient after ${iterationCount} attempts:\n  - ` +
           inputData.deficits.join('\n  - '),
       );
     }
-    return false;
+    return Promise.resolve(false);
   })
   .then(runSynthesis);
 
