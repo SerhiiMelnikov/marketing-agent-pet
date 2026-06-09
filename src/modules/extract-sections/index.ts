@@ -40,11 +40,12 @@ export function extractSections(markdown: string): Section[] {
 
   for (const node of tree.children) {
     if (node.type === 'heading' && node.position) {
-      headings.push({
-        node,
-        startOffset: node.position.start.offset ?? 0,
-        endOffset: node.position.end.offset ?? 0,
-      });
+      const startOffset = node.position.start.offset;
+      const endOffset = node.position.end.offset;
+      if (startOffset === undefined || endOffset === undefined) {
+        throw new Error('extract-sections: heading node missing position offsets');
+      }
+      headings.push({ node, startOffset, endOffset });
     }
   }
 
@@ -88,8 +89,17 @@ function buildSection(heading: string | null, level: number, content: string): S
 }
 
 function headingText(node: Heading): string {
-  return node.children
-    .map((child) => (child.type === 'text' ? child.value : ''))
-    .join('')
-    .trim();
+  return extractText(node).trim();
+}
+
+function extractText(node: { type: string; value?: string; children?: unknown[] }): string {
+  if (node.type === 'text' || node.type === 'inlineCode') {
+    return node.value ?? '';
+  }
+  if (Array.isArray(node.children)) {
+    return node.children
+      .map((child) => extractText(child as { type: string; value?: string; children?: unknown[] }))
+      .join('');
+  }
+  return '';
 }
