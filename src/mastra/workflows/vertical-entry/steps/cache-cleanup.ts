@@ -8,9 +8,12 @@ const log = logger.child({ module: 'vertical-entry-cache-cleanup' });
 
 /**
  * Clear the per-run page cache, swallowing failures so a cleanup error
- * never masks the actual workflow result. Used by the research-iteration
- * step on its final-exit paths (passed:true or throw); the retry path
- * intentionally leaves the cache warm so the next iteration can hit it.
+ * never masks the actual workflow result. Called from the dountil
+ * callback on both terminal paths (deficits cleared → loop exits;
+ * iteration cap reached → throw) and from the research-iteration step's
+ * catch block when the researcher invocation itself throws. The
+ * mid-loop retry path intentionally leaves the cache warm so the next
+ * iteration can hit it.
  */
 export async function clearCache(runId: string): Promise<void> {
   try {
