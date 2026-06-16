@@ -9,7 +9,14 @@ const envSchema = z.object({
   TAVILY_API_KEY: z.string().optional(),
   EXA_API_KEY: z.string().optional(),
   BRAVE_API_KEY: z.string().optional(),
-  OPENROUTER_API_KEY: z.string().min(1),
+  // Model provider keys. Mastra's model router reads these directly from
+  // process.env by name; we declare them here only for fail-fast validation.
+  // The active routing uses Anthropic (synthesizer) + Google (researcher,
+  // cheap judge) directly — no OpenRouter gateway. OPENROUTER_API_KEY stays
+  // optional so an openrouter/* pool entry still works if reintroduced.
+  ANTHROPIC_API_KEY: z.string().min(1),
+  GOOGLE_API_KEY: z.string().min(1),
+  OPENROUTER_API_KEY: z.string().optional(),
   FIRECRAWL_API_KEY: z.string().trim().nonempty(),
   // Comma-separated pool. The router round-robins between entries so
   // traffic is roughly even across providers. A single-entry pool acts
