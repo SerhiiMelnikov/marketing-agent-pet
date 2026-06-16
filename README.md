@@ -1,30 +1,36 @@
 # marketing-agent
 
-Welcome to your new [Mastra](https://mastra.ai/) project! We're excited to see what you'll build.
+Multi-agent **vertical market-entry research** system built on [Mastra](https://mastra.ai/). Given a target industry vertical and a company profile, it researches the market and produces a sourced markdown report — market trends, competitor landscape, candidate ICPs, fit analysis, and a positioning recommendation.
 
-## Getting Started
+## How it works
 
-Start the development server:
+A **deterministic Mastra workflow** (`vertical-entry`) coordinates two agents:
 
-```shell
-npm run dev
+- **researcher** — searches and fetches the web, writing findings into a schema-typed working-memory document. It re-runs until a deterministic quality gate is met (minimum trends / competitors / ICPs / sources, plus triangulation of quantitative claims), capped at 3 attempts.
+- **synthesizer** — reads **only** working memory + the brief and writes the final report. It has no web access, so it cannot fabricate. Five scorers grade the output (citation format/integrity, source diversity, company fit, claim grounding).
+
+See [AGENTS.md](AGENTS.md) for the full architecture.
+
+## Setup
+
+1. `npm install`
+2. `cp .env.example .env` and fill in the required keys:
+   - `ANTHROPIC_API_KEY` — synthesizer ([console.anthropic.com](https://console.anthropic.com/settings/keys))
+   - `GOOGLE_API_KEY` — researcher + scorer judges ([aistudio.google.com](https://aistudio.google.com/apikey))
+   - search + fetch provider keys — see `.env.example`
+3. `npm run dev`, then open [http://localhost:4111](http://localhost:4111) (Mastra Studio) and run the `vertical-entry` workflow.
+
+Storage is local SQLite — no database server required.
+
+## Commands
+
+```bash
+npm run dev        # Mastra Studio (localhost:4111)
+npm run build      # production server
+npx tsc --noEmit   # type-check
+npm run lint
 ```
 
-Open [http://localhost:4111](http://localhost:4111) in your browser to access [Mastra Studio](https://mastra.ai/docs/studio/overview). It provides an interactive UI for building and testing your agents, along with a REST API that exposes your Mastra application as a local service. This lets you start building without worrying about integration right away.
+## Structure & samples
 
-You can start editing files inside the `src/mastra` directory. The development server will automatically reload whenever you make changes.
-
-## Learn more
-
-To learn more about Mastra, visit our [documentation](https://mastra.ai/docs/). Your bootstrapped project includes example code for [agents](https://mastra.ai/docs/agents/overview), [tools](https://mastra.ai/docs/agents/using-tools), [workflows](https://mastra.ai/docs/workflows/overview), [scorers](https://mastra.ai/docs/evals/overview), and [observability](https://mastra.ai/docs/observability/overview).
-
-If you're new to AI agents, check out our [course](https://mastra.ai/learn) and [YouTube videos](https://youtube.com/@mastra-ai). You can also join our [Discord](https://discord.gg/BTYqqHKUrf) community to get help and share your projects.
-
-## Deploy to the Mastra platform
-
-The [Mastra platform](https://projects.mastra.ai) provides two products for deploying and managing AI applications built with the Mastra framework:
-
-- **Studio**: A hosted visual environment for testing agents, running workflows, and inspecting traces
-- **Server**: A production deployment target that runs your Mastra application as an API server
-
-Learn more in the [Mastra platform documentation](https://mastra.ai/docs/mastra-platform/overview).
+Folder layout is documented in [AGENTS.md](AGENTS.md). Real generated reports live in [`docs/results/`](docs/results/); design specs and implementation plans in [`docs/superpowers/`](docs/superpowers/).

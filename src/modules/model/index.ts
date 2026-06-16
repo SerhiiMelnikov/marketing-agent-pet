@@ -7,9 +7,9 @@ export type { MastraModelId } from './types';
 export { mastraModelIdSchema, mastraModelIdPoolSchema } from './mastra-model-id';
 
 const DEFAULT_MODELS: Record<ModelRole, MastraModelId> = {
-  researcher: 'openrouter/anthropic/claude-sonnet-4.5',
-  synthesizer: 'openrouter/anthropic/claude-opus-4.7',
-  cheap: 'openrouter/google/gemini-2.5-flash',
+  researcher: 'google/gemini-2.5-flash-lite',
+  synthesizer: 'anthropic/claude-sonnet-4-6',
+  cheap: 'google/gemini-2.5-flash-lite',
 };
 
 const POOLS: Partial<Record<ModelRole, readonly MastraModelId[]>> = {
@@ -48,8 +48,7 @@ function pickFromPool(role: ModelRole): MastraModelId | null {
  * Resolution order on each call:
  *   1. Pool round-robin (MODEL_<ROLE>_POOL) — even distribution.
  *      A single-entry pool acts as a hard override.
- *   2. Daily-rotated model from the shir-man endpoint
- *   3. Hardcoded default
+ *   2. Hardcoded default (DEFAULT_MODELS).
  */
 export const model = (role: ModelRole) => (): MastraModelId =>
   pickFromPool(role) ?? DEFAULT_MODELS[role];

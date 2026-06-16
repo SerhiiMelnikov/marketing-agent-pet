@@ -1,5 +1,6 @@
 import { RequestContext } from '@mastra/core/request-context';
 import { researcher } from '../../../agents/researcher';
+import { logger } from '../../../../utils/logger';
 import type { Mastra } from '@mastra/core/mastra';
 
 export interface InvokeResearcherOptions {
@@ -38,6 +39,20 @@ export async function invokeResearcher(
     process.stdout.write(chunk);
     completionSignal += chunk;
   }
+
+  // Verify prompt caching is actually firing. `cachedInputTokens > 0` means the
+  // provider served part of the prompt prefix from cache — for Gemini 2.5 this
+  // is implicit caching (on by default). If it stays 0 across iterations, the
+  // cached prefix is being invalidated every step (e.g. working-memory content
+  // injected ahead of the volatile tail). Values are summed across all model
+  // steps in this stream.
+  const usage = await response.usage;
+  logger.info('researcher model usage', {
+    threadId: opts.threadId,
+    inputTokens: usage.inputTokens,
+    cachedInputTokens: usage.cachedInputTokens ?? 0,
+    outputTokens: usage.outputTokens,
+  });
 
   return { completionSignal };
 }
