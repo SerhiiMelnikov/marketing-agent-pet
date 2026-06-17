@@ -17,7 +17,7 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1),
   GOOGLE_API_KEY: z.string().min(1),
   OPENROUTER_API_KEY: z.string().optional(),
-  FIRECRAWL_API_KEY: z.string().trim().nonempty(),
+  FIRECRAWL_API_KEY: z.string().trim().min(1).optional(),
   // Comma-separated pool. The router round-robins between entries so
   // traffic is roughly even across providers. A single-entry pool acts
   // as a hard override ("always use exactly this model").
