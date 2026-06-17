@@ -2,6 +2,7 @@ import { env } from '../../config/env';
 import type { SearchProvider } from './types';
 import { SearchProviderName } from './enums/provider.enum';
 import { TavilyProvider } from './providers/tavily.provider';
+import { ExaProvider } from './providers/exa.provider';
 
 let providers: Map<SearchProviderName, SearchProvider> | null = null;
 
@@ -12,6 +13,10 @@ export function init() {
 
   if (env.TAVILY_API_KEY) {
     providers.set(SearchProviderName.Tavily, new TavilyProvider({ apiKey: env.TAVILY_API_KEY }));
+  }
+
+  if (env.EXA_API_KEY) {
+    providers.set(SearchProviderName.Exa, new ExaProvider(env.EXA_API_KEY));
   }
 
   if (!providers.get(env.SEARCH_PROVIDER)) {

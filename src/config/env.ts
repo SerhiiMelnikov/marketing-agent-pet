@@ -5,7 +5,7 @@ import { mastraModelIdPoolSchema } from '../modules/model/mastra-model-id';
 import { ONIX } from '../modules/companies/onix';
 
 const envSchema = z.object({
-  SEARCH_PROVIDER: z.enum(SearchProviderName).default(SearchProviderName.Tavily),
+  SEARCH_PROVIDER: z.enum(SearchProviderName).default(SearchProviderName.Exa),
   TAVILY_API_KEY: z.string().optional(),
   EXA_API_KEY: z.string().optional(),
   BRAVE_API_KEY: z.string().optional(),
