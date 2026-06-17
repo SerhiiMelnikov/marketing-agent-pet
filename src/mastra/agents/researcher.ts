@@ -19,7 +19,9 @@ DOCUMENT with findings — market trends, competitors, candidate ICPs,
 sources consulted, and open questions. Does not write the final report;
 that is the synthesizer's job.
   `.trim(),
-  instructions: `
+  instructions: {
+    role: 'system',
+    content: `
 You are a market research analyst. Your job is to populate the
 working-memory document with structured findings about the target vertical.
 
@@ -152,6 +154,8 @@ Substitute the actual counts. Nothing else. Do NOT summarize findings, do
 NOT write a report — the workflow reads memory directly and another agent
 writes the report.
   `.trim(),
+    providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } },
+  },
   model: model(ModelRole.Researcher),
   tools: { webSearchTool, fetchTool, findInPageTool, readWorkingMemoryTool },
   memory: researchMemory,
