@@ -1,6 +1,7 @@
 import { SearchProviderName } from './enums/provider.enum';
 import * as Providers from './factory';
 import { deprioritizeGated, withDefaultExcludes } from './domain-presets';
+import { capResultContent } from './content-cap';
 import type { SearchQuery, SearchResult } from './types';
 
 export type { SearchQuery, SearchResult, SearchProvider } from './types';
@@ -16,7 +17,7 @@ export async function search(
   const provider = Providers.get(options.provider);
   const results = await provider.search(withDefaultExcludes(query));
 
-  return deprioritizeGated(results);
+  return capResultContent(deprioritizeGated(results));
 }
 
 export function init() {
