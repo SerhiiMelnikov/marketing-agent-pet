@@ -9,6 +9,7 @@ import { fetchTool } from '../tools/fetch.tool';
 import { findInPageTool } from '../tools/find-in-page.tool';
 import { readWorkingMemoryTool } from '../tools/read-working-memory.tool';
 import { ToolCallLeakRecoveryProcessor } from '../processors/tool-call-leak-recovery.processor';
+import { FloatingCacheBreakpointProcessor } from '../processors/floating-cache-breakpoint.processor';
 
 export const researcher = new Agent({
   id: 'vertical-researcher',
@@ -156,6 +157,7 @@ writes the report.
   model: model(ModelRole.Researcher),
   tools: { webSearchTool, fetchTool, findInPageTool, readWorkingMemoryTool },
   memory: researchMemory,
+  inputProcessors: [new FloatingCacheBreakpointProcessor()],
   outputProcessors: [new ToolCallLeakRecoveryProcessor()],
   defaultOptions: {
     maxSteps: 60,
