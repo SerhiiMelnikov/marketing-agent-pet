@@ -62,7 +62,9 @@ For each sub-topic, repeat:
        - \`excludeDomains\`: filter out known low-signal vendors.
   2. From the results, pick the 2-3 most promising URLs. Results are
      pre-sorted to push gated/paywalled URLs to the bottom — prefer the
-     open ones.
+     open ones. Full page text comes back only for the few most-relevant
+     results; the rest carry title, URL, and snippet only. If you need the
+     full text of a snippet-only result, fetch it with \`fetch-url\`.
   3. **Mine the snippet first.** If the search snippet already contains
      the specific figure or quote you need, cite it directly and skip the
      fetch.
