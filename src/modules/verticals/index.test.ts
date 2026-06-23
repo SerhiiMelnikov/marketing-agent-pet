@@ -32,6 +32,10 @@ describe('resolveVerticalBias', () => {
     expect(resolveVerticalBias('HEALTHCARE').matchedKey).toBe('healthcare');
   });
 
+  it('honors first-match order: a phrase with both finance and the broad btr "housing" alias resolves to finance', () => {
+    expect(resolveVerticalBias('affordable housing finance').matchedKey).toBe('finance');
+  });
+
   it('falls back to generic shared bias (null key, empty gov/trade) on no match', () => {
     const b = resolveVerticalBias('underwater basket weaving');
 
