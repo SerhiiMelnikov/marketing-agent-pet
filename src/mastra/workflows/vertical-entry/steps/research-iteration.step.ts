@@ -1,13 +1,11 @@
 // src/mastra/workflows/vertical-entry/steps/research-iteration.step.ts
 
 import { createStep } from '@mastra/core/workflows';
-import { researchMemory } from '../../../memory';
-import {
-  researchMemorySchema,
-  type ResearchMemory,
-} from '../../../schemas/research-memory';
+import type { ResearchMemory } from '../../../schemas/research-memory';
+import { readResearchMemory } from '../read-memory';
 import { iterationStateSchema } from './prepare-research.step';
 import { invokeResearcher } from './invoke-researcher';
+import { corroborationDeficits } from '../corroboration';
 
 const MIN_TRENDS = 3;
 const MIN_COMPETITORS = 3;
@@ -44,44 +42,19 @@ export const runResearchIteration = createStep({
       prompt,
     });
 
-    const newMemory = await readMemory(runId, 'default');
+    const newMemory = await readResearchMemory(runId, 'default');
+
+    const blockingDeficits = collectBlockingDeficits(newMemory);
 
     return {
       ...inputData,
       completionSignal,
-      deficits: collectDeficits(newMemory),
+      blockingDeficits,
+      deficits: [...blockingDeficits, ...corroborationDeficits(newMemory)],
       memoryCounts: countsFromMemory(newMemory),
     };
   },
 });
-
-async function readMemory(threadId: string, resourceId: string): Promise<ResearchMemory> {
-  const raw = await researchMemory.getWorkingMemory({ threadId, resourceId });
-
-  if (!raw) {
-    throw new Error(
-      'Researcher invoked but produced no working memory. The persistence layer may be failing — halting.',
-    );
-  }
-
-  let parsedJson: unknown;
-  try {
-    parsedJson = JSON.parse(raw);
-  } catch {
-    throw new Error(
-      `Working memory is not valid JSON. Length: ${raw.length}. Head: ${raw.slice(0, 200)}`,
-    );
-  }
-
-  const parsed = researchMemorySchema.safeParse(parsedJson);
-  if (!parsed.success) {
-    throw new Error(
-      'Working memory does not match the expected schema: ' + parsed.error.message,
-    );
-  }
-
-  return parsed.data;
-}
 
 function countsFromMemory(m: ResearchMemory): MemoryCounts {
   return {
@@ -93,7 +66,7 @@ function countsFromMemory(m: ResearchMemory): MemoryCounts {
   };
 }
 
-function collectDeficits(m: ResearchMemory): string[] {
+function collectBlockingDeficits(m: ResearchMemory): string[] {
   const deficits: string[] = [];
 
   if (m.marketTrends.length < MIN_TRENDS) {

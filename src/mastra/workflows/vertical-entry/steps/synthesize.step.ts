@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { createStep } from '@mastra/core/workflows';
 import { synthesizer } from '../../../agents/synthesizer';
 import { iterationStateSchema } from './prepare-research.step';
+import { readResearchMemory } from '../read-memory';
+import { corroborationFlagBlock } from '../corroboration';
 
 export const reportSchema = z.object({
   threadId: z.string(),
@@ -19,6 +21,9 @@ export const runSynthesis = createStep({
   execute: async ({ inputData, mastra, runId }) => {
     const agent = mastra.getAgentById(synthesizer.id);
 
+    const memory = await readResearchMemory(runId, 'default');
+    const flagBlock = corroborationFlagBlock(memory);
+
     const prompt = `
 The researcher has populated working memory with findings about:
 
@@ -27,7 +32,7 @@ Company: ${inputData.companyName}
 Profile:
 ${inputData.companyFacts}
 
-Read the working-memory document now and produce the final markdown report.
+Read the working-memory document now and produce the final markdown report.${flagBlock ? `\n\n${flagBlock}` : ''}
     `.trim();
 
     const response = await agent.stream([{ role: 'user', content: prompt }], {

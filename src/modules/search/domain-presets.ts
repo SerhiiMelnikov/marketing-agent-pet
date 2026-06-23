@@ -62,3 +62,29 @@ export const withDefaultExcludes = (query: SearchQuery): SearchQuery => {
 
   return { ...query, excludeDomains: [...new Set(merged)] };
 };
+
+/**
+ * Hard-enforce the agent's includeDomains. Search providers (Exa included)
+ * treat includeDomains as a soft ranking hint, so off-list results still come
+ * back — this drops them. Subdomain-aware. An empty/absent list is the
+ * open-discovery path and is returned unchanged.
+ */
+export const enforceIncludeDomains = (
+  results: SearchResult[],
+  includeDomains?: string[],
+): SearchResult[] => {
+  if (!includeDomains?.length) return results;
+
+  const allow = includeDomains.map(normalizeHost);
+
+  return results.filter((r) => {
+    let host: string;
+    try {
+      host = normalizeHost(new URL(r.url).hostname);
+    } catch {
+      return false;
+    }
+
+    return allow.some((d) => host === d || host.endsWith(`.${d}`));
+  });
+};
