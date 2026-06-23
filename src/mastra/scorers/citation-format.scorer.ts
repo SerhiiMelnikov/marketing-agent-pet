@@ -15,8 +15,10 @@ export const citationFormatScorer = createScorer({
 
     const jsonCitationLeak = /【?\{?["']?source["']?\s*:/.test(text);
     const rawBracketObjects = /【.*\{.*\}.*】/.test(text);
+    // Native model citation markers (`【1†Source】`, `【1】`) instead of `[N]`.
+    const nativeCitationMarker = /[【】]/.test(text);
 
-    return +!(jsonCitationLeak || rawBracketObjects);
+    return +!(jsonCitationLeak || rawBracketObjects || nativeCitationMarker);
   })
   .generateReason(({ score, results }) => {
     if (!results.preprocessStepResult.isComplete) {
@@ -25,5 +27,5 @@ export const citationFormatScorer = createScorer({
 
     return score
       ? 'Citations are clean.'
-      : 'Report contains raw JSON/serialized citations instead of clean references.';
+      : 'Report contains raw JSON/serialized or native (【N】) citation markers instead of clean [N] references.';
   });

@@ -6,6 +6,7 @@ import { synthesizer } from '../../../agents/synthesizer';
 import { iterationStateSchema } from './prepare-research.step';
 import { readResearchMemory } from '../read-memory';
 import { corroborationFlagBlock } from '../corroboration';
+import { normalizeCitations } from '../normalize-citations';
 
 export const reportSchema = z.object({
   threadId: z.string(),
@@ -50,6 +51,6 @@ Read the working-memory document now and produce the final markdown report.${fla
       report += chunk;
     }
 
-    return { threadId: runId, report };
+    return { threadId: runId, report: normalizeCitations(report) };
   },
 });
