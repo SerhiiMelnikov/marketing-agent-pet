@@ -120,6 +120,7 @@ function buildIterationPrompt(
     companyName: string;
     companyFacts: string;
     companyVerified: string;
+    sourceBias: string;
   },
   deficits: string[],
   counts: MemoryCounts,
@@ -155,6 +156,8 @@ Company: ${state.companyName}
 Profile (verified ${state.companyVerified}):
 ${state.companyFacts}
 ${progressBlock}${deficitsBlock}
+
+${state.sourceBias}
 
 Populate working memory with structured findings.${findingsNote} When done, emit your completion signal in exactly this shape:
 \`Recorded N trends, M competitors, K ICPs, S sources, Q open questions.\`

@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { createStep } from '@mastra/core/workflows';
 import { getProfile } from '../../../../modules/companies';
 import { env } from '../../../../config/env';
+import { resolveVerticalBias, renderSourceBias } from '../../../../modules/verticals';
+import { logger } from '../../../../utils/logger';
 
 export const briefSchema = z.object({
   vertical: z
@@ -34,6 +36,7 @@ export const iterationStateSchema = z.object({
   companyName: z.string(),
   companyFacts: z.string(),
   companyVerified: z.string(),
+  sourceBias: z.string(),
   completionSignal: z.string(),
   deficits: z.array(z.string()),
   blockingDeficits: z.array(z.string()),
@@ -66,11 +69,19 @@ export const prepareResearch = createStep({
       throw new Error(`Unknown companyKey: "${companyKey}"`);
     }
 
+    const bias = resolveVerticalBias(inputData.vertical);
+    if (!bias.matchedKey) {
+      logger.warn(
+        `No vertical config matched "${inputData.vertical}" — using generic shared source bias only.`,
+      );
+    }
+
     return Promise.resolve({
       vertical: inputData.vertical,
       companyName: profile.name,
       companyFacts: profile.facts,
       companyVerified: profile.lastVerified,
+      sourceBias: renderSourceBias(bias),
       completionSignal: '',
       deficits: [],
       blockingDeficits: [],
