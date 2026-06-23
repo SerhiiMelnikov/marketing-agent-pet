@@ -87,4 +87,34 @@ describe('deprioritizeGated', () => {
 
     expect(out.map((r) => r.url)).toEqual(urls);
   });
+
+  it('also sinks the gartner-documents and forrester-report gated patterns', () => {
+    const out = deprioritizeGated([
+      R('https://gartner.com/en/documents/123'),
+      R('https://news.example/a'),
+      R('https://forrester.com/report/x'),
+    ]);
+
+    expect(out.map((r) => r.url)).toEqual([
+      'https://news.example/a',
+      'https://gartner.com/en/documents/123',
+      'https://forrester.com/report/x',
+    ]);
+  });
+
+  it('preserves relative order within both the gated and non-gated buckets', () => {
+    const out = deprioritizeGated([
+      R('https://everestgrp.com/report/1'),
+      R('https://a.example/x'),
+      R('https://forrester.com/report/2'),
+      R('https://b.example/y'),
+    ]);
+
+    expect(out.map((r) => r.url)).toEqual([
+      'https://a.example/x',
+      'https://b.example/y',
+      'https://everestgrp.com/report/1',
+      'https://forrester.com/report/2',
+    ]);
+  });
 });
