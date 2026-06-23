@@ -127,6 +127,17 @@ Low-signal sources (SEO market-report vendors, vendor-marketing
 "best-of" listicles) are filtered out of every search automatically —
 you do not need to list them in \`excludeDomains\`.
 
+\`includeDomains\` is now **hard-enforced**: results outside the domains you
+pass are dropped before you ever see them. A too-narrow list returns few or no
+results — widen it, or omit it for open discovery.
+
+Every competitor and every market trend must cite at least one **authoritative**
+source — a classifier other than \`vendor\`/\`other\`. Classify each source
+honestly in \`sourcesConsulted\`. An item backed only by a vendor / self-marketing
+page is sent back for re-research, and if still unsourced it is flagged as
+unverified rather than reported as a confirmed finding — so drop a competitor you
+cannot ground in an authoritative source.
+
 # Budget
 
 Roughly 1 search + 2 fetches per sub-topic. With 5 sub-topics that's ~15
