@@ -32,9 +32,23 @@ const normalizeUrl = (url: string): string => {
 
 const truncate = (s: string, n = 60): string => (s.length > n ? `${s.slice(0, n)}…` : s);
 
+/** Renders an item's sources as `url (classifier)` for a deficit message,
+ *  capping the list so a competitor with many sources stays readable. */
+const fmtSources = (sources: { url: string; classifier: string }[]): string => {
+  const shown = sources.slice(0, 3).map((s) => `${s.url} (${s.classifier})`).join(', ');
+
+  return sources.length > 3 ? `${shown}, …` : shown;
+};
+
 export interface CorroborationVerdict {
   label: string;
   corroborated: boolean;
+  /**
+   * The item's sources with their resolved classifier ('unclassified' when the
+   * URL is absent from `sourcesConsulted`). Lets the gate name the exact
+   * offending source instead of a vague "vendor/other" verdict.
+   */
+  sources: { url: string; classifier: string }[];
 }
 
 export interface CorroborationReport {
@@ -59,15 +73,21 @@ export function assessCorroboration(m: ResearchMemory): CorroborationReport {
 
     return c !== undefined && !NON_AUTHORITATIVE.has(c);
   };
+  const resolve = (url: string) => ({
+    url,
+    classifier: classifierByUrl.get(normalizeUrl(url)) ?? 'unclassified',
+  });
 
   return {
     competitors: m.competitors.map((c) => ({
       label: c.name,
       corroborated: c.sources.some(isAuthoritative),
+      sources: c.sources.map(resolve),
     })),
     trends: m.marketTrends.map((t) => ({
       label: t.claim,
       corroborated: isAuthoritative(t.sourceUrl),
+      sources: [resolve(t.sourceUrl)],
     })),
   };
 }
@@ -84,14 +104,18 @@ export function corroborationDeficits(m: ResearchMemory): string[] {
   for (const c of report.competitors) {
     if (!c.corroborated) {
       deficits.push(
-        `competitor "${truncate(c.label)}": only vendor/other-classified sources — add an analyst / trade-press / government / SEC source, OR remove it if unverifiable`,
+        `competitor "${truncate(c.label)}": no authoritative source — its sources are ${fmtSources(c.sources)}. Add an analyst / trade-press / government / SEC source (and classify it in sourcesConsulted), OR remove it if unverifiable`,
       );
     }
   }
   for (const t of report.trends) {
     if (!t.corroborated) {
+      const s = t.sources[0];
+      const where = s
+        ? `its source ${s.url} is classified "${s.classifier}"`
+        : 'it has no source';
       deficits.push(
-        `marketTrend "${truncate(t.label)}": source is vendor/other — ground it in an analyst/government source, OR drop the claim`,
+        `marketTrend "${truncate(t.label)}": ${where}, which is not authoritative — ground it in an analyst/government source (classified in sourcesConsulted), OR drop the claim`,
       );
     }
   }
@@ -111,7 +135,7 @@ export function corroborationFlagBlock(m: ResearchMemory): string | null {
   if (!competitors.length && !trends.length) return null;
 
   const lines = [
-    ...competitors.map((c) => `  - competitor: ${c}`),
+    ...competitors.map((c) => `  - competitor: ${truncate(c)}`),
     ...trends.map((t) => `  - trend: ${truncate(t)}`),
   ];
 
