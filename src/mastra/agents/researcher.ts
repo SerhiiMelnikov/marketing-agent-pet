@@ -107,21 +107,10 @@ a fact.
 
 ### Source bias
 
-**Strongly prefer** (pass these in \`includeDomains\` per query, picking
-the relevant subset — primary government first, then analyst / consulting
-/ trade press):
-
-  - **Primary government / regulatory**: hhs.gov, cms.gov, healthit.gov
-    (ONC), fda.gov, federalregister.gov, gao.gov, ftc.gov
-  - **SEC filings & official corporate**: sec.gov, investor.* / ir.*
-    subdomains of named incumbents, official company press releases
-  - **Analyst firms**: gartner.com, forrester.com, idc.com,
-    everestgrp.com, hfsresearch.com
-  - **Consulting publications**: deloitte.com, mckinsey.com, bcg.com,
-    bain.com, capgemini.com, accenture.com (insights / research articles
-    only — NOT /services/ or /solutions/ marketing pages)
-  - **Trade press**: healthcareitnews.com, fiercehealthcare.com,
-    beckershospitalreview.com, himss.org, modernhealthcare.com, statnews.com
+A vertical-specific list of authoritative domains to **strongly prefer** is
+provided in the brief below under "Authoritative source bias". Pass the relevant
+subset as \`includeDomains\` per query (government first, then analyst /
+consulting / trade press).
 
 Low-signal sources (SEO market-report vendors, vendor-marketing
 "best-of" listicles) are filtered out of every search automatically —
