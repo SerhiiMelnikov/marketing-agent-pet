@@ -8,6 +8,7 @@ import {
 } from '../../../schemas/research-memory';
 import { iterationStateSchema } from './prepare-research.step';
 import { invokeResearcher } from './invoke-researcher';
+import { corroborationDeficits } from '../corroboration';
 
 const MIN_TRENDS = 3;
 const MIN_COMPETITORS = 3;
@@ -137,6 +138,8 @@ function collectDeficits(m: ResearchMemory): string[] {
       );
     }
   }
+
+  deficits.push(...corroborationDeficits(m));
 
   return deficits;
 }
