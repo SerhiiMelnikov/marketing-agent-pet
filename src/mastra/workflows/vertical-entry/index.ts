@@ -24,12 +24,19 @@ const verticalEntryWorkflow = createWorkflow({
 })
   .then(prepareResearch)
   .dountil(runResearchIteration, ({ inputData, iterationCount }) => {
+    // Exit when every gap is closed (count, triangulation, and corroboration).
     if (inputData.deficits.length === 0) return Promise.resolve(true);
     if (iterationCount >= MAX_ATTEMPTS) {
-      throw new Error(
-        `Research insufficient after ${iterationCount} attempts:\n  - ` +
-          inputData.deficits.join('\n  - '),
-      );
+      // Count/triangulation minimums are hard requirements — fail the run.
+      if (inputData.blockingDeficits.length > 0) {
+        throw new Error(
+          `Research insufficient after ${iterationCount} attempts:\n  - ` +
+            inputData.blockingDeficits.join('\n  - '),
+        );
+      }
+      // Only corroboration gaps remain: fall through to synthesis, where the
+      // surviving items are flagged under "Confidence & Gaps".
+      return Promise.resolve(true);
     }
     return Promise.resolve(false);
   })

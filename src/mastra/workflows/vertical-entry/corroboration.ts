@@ -10,7 +10,25 @@ import type { ResearchMemory } from '../../schemas/research-memory';
  */
 const NON_AUTHORITATIVE = new Set(['vendor', 'other']);
 
-const normalizeUrl = (url: string): string => url.trim().toLowerCase().replace(/\/+$/, '');
+/**
+ * Canonical key for matching a competitor/trend source URL against a
+ * `sourcesConsulted` entry. Ignores protocol (http vs https), a leading
+ * `www.`, the query string, the fragment, and a trailing slash — the URL
+ * variations an LLM routinely introduces when it re-types the same source
+ * into two schema fields. Falls back to a lower-cased trim for inputs that
+ * are not parseable URLs.
+ */
+const normalizeUrl = (url: string): string => {
+  try {
+    const u = new URL(url.trim());
+    const host = u.hostname.toLowerCase().replace(/^www\./, '');
+    const path = u.pathname.replace(/\/+$/, '');
+
+    return `${host}${path}`;
+  } catch {
+    return url.trim().toLowerCase().replace(/\/+$/, '');
+  }
+};
 
 const truncate = (s: string, n = 60): string => (s.length > n ? `${s.slice(0, n)}…` : s);
 

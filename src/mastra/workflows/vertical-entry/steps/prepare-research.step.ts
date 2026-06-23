@@ -36,6 +36,7 @@ export const iterationStateSchema = z.object({
   companyVerified: z.string(),
   completionSignal: z.string(),
   deficits: z.array(z.string()),
+  blockingDeficits: z.array(z.string()),
   memoryCounts: z.object({
     trends: z.number().int().nonnegative(),
     competitors: z.number().int().nonnegative(),
@@ -72,6 +73,7 @@ export const prepareResearch = createStep({
       companyVerified: profile.lastVerified,
       completionSignal: '',
       deficits: [],
+      blockingDeficits: [],
       memoryCounts: {
         trends: 0,
         competitors: 0,

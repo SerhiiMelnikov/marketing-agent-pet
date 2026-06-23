@@ -44,10 +44,13 @@ export const runResearchIteration = createStep({
 
     const newMemory = await readResearchMemory(runId, 'default');
 
+    const blockingDeficits = collectBlockingDeficits(newMemory);
+
     return {
       ...inputData,
       completionSignal,
-      deficits: collectDeficits(newMemory),
+      blockingDeficits,
+      deficits: [...blockingDeficits, ...corroborationDeficits(newMemory)],
       memoryCounts: countsFromMemory(newMemory),
     };
   },
@@ -63,7 +66,7 @@ function countsFromMemory(m: ResearchMemory): MemoryCounts {
   };
 }
 
-function collectDeficits(m: ResearchMemory): string[] {
+function collectBlockingDeficits(m: ResearchMemory): string[] {
   const deficits: string[] = [];
 
   if (m.marketTrends.length < MIN_TRENDS) {
@@ -107,8 +110,6 @@ function collectDeficits(m: ResearchMemory): string[] {
       );
     }
   }
-
-  deficits.push(...corroborationDeficits(m));
 
   return deficits;
 }
