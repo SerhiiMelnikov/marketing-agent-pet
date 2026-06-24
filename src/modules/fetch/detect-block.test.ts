@@ -14,6 +14,7 @@ describe('detectBlock', () => {
     const b = detectBlock('Some page', 'Please verify you are human to proceed.');
 
     expect(b?.reason).toBe(BlockReason.Captcha);
+    expect(b?.signal).toBe('verify you are human');
   });
 
   it('flags a paywall signal in a short body', () => {

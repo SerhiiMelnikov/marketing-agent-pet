@@ -12,6 +12,10 @@ describe('extractUrls', () => {
   it('returns an empty array when there are no URLs', () => {
     expect(extractUrls('no links here')).toEqual([]);
   });
+
+  it('strips a trailing semicolon', () => {
+    expect(extractUrls('ref https://x.com/a;')).toEqual(['https://x.com/a']);
+  });
 });
 
 describe('extractDomains', () => {

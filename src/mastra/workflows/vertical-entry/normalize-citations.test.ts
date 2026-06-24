@@ -25,4 +25,8 @@ describe('normalizeCitations', () => {
   it('leaves existing [N] citations untouched', () => {
     expect(normalizeCitations('clean [3] already')).toBe('clean [3] already');
   });
+
+  it('normalizes a marker with internal whitespace', () => {
+    expect(normalizeCitations('x 【 1 】 y')).toBe('x [1] y');
+  });
 });
