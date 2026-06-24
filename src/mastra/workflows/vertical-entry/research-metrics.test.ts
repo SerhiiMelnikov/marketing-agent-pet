@@ -76,4 +76,17 @@ describe('computeResearchMetrics', () => {
 
     expect(m.triangulationRate).toBe(1);
   });
+
+  it('treats a trend as quantitative when only the evidence carries a figure', () => {
+    const m = computeResearchMetrics(
+      mem({
+        marketTrends: [
+          { claim: 'adoption is rising', evidence: 'reached $2B in 2025', sourceUrl: 'https://a', publisher: 'X' },
+        ],
+      }),
+    );
+
+    // A lone quant trend → 0; if the evidence figure were ignored it would be 1.
+    expect(m.triangulationRate).toBe(0);
+  });
 });

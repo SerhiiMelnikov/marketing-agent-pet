@@ -260,7 +260,7 @@ export const recordResearchMetrics = createStep({
     const memory = await readResearchMemory(runId, 'default');
     const metrics = computeResearchMetrics(memory);
 
-    log.info({ researchMetrics: metrics }, 'research quality metrics');
+    log.info('research quality metrics', { researchMetrics: metrics });
 
     return inputData;
   },
