@@ -4,6 +4,7 @@ import { createWorkflow } from '@mastra/core/workflows';
 import { briefSchema, prepareResearch } from './steps/prepare-research.step';
 import { runResearchIteration } from './steps/research-iteration.step';
 import { reportSchema, runSynthesis } from './steps/synthesize.step';
+import { recordResearchMetrics } from './steps/record-research-metrics.step';
 import { clearCache } from './steps/cache-cleanup';
 
 const MAX_ATTEMPTS = 3;
@@ -40,6 +41,7 @@ const verticalEntryWorkflow = createWorkflow({
     }
     return Promise.resolve(false);
   })
+  .then(recordResearchMetrics)
   .then(runSynthesis);
 
 verticalEntryWorkflow.commit();
