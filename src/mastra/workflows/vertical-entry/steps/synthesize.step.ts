@@ -50,7 +50,15 @@ Read the working-memory document now and produce the final markdown report.${fla
         memory: {
           thread: runId,
           resource: 'default',
-          options: { readOnly: true },
+          // The synthesizer must be grounded ONLY in working memory (the typed
+          // contract between agents), not the researcher's raw message history.
+          // The default `lastMessages: 10` was loading ~131k tokens of the
+          // researcher's search/fetch transcript into this prompt — bloating
+          // cost (~$0.49 of wasted cacheWrite per run) and starving the model
+          // into a near-empty report (8 output tokens, finishReason "stop").
+          // `false` disables conversation-history loading; working memory is
+          // injected by its own input processor and is unaffected.
+          options: { readOnly: true, lastMessages: false },
         },
         maxSteps: 1,
       });
