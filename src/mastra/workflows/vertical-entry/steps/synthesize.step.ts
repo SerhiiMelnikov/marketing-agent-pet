@@ -7,11 +7,15 @@ import { iterationStateSchema } from './prepare-research.step';
 import { readResearchMemory } from '../read-memory';
 import { corroborationFlagBlock } from '../corroboration';
 import { normalizeCitations } from '../normalize-citations';
+import { gradeReportStructure, renderRetryFeedback } from '../grade-report';
+import { logger } from '../../../../utils/logger';
 
 export const reportSchema = z.object({
   threadId: z.string(),
   report: z.string(),
 });
+
+const MAX_SYNTH_ATTEMPTS = 3; // 1 initial + 2 retries on structural citation defects
 
 export const runSynthesis = createStep({
   id: 'run-synthesis',
@@ -25,7 +29,7 @@ export const runSynthesis = createStep({
     const memory = await readResearchMemory(runId, 'default');
     const flagBlock = corroborationFlagBlock(memory);
 
-    const prompt = `
+    const basePrompt = `
 The researcher has populated working memory with findings about:
 
 Vertical: ${inputData.vertical}
@@ -36,21 +40,41 @@ ${inputData.companyFacts}
 Read the working-memory document now and produce the final markdown report.${flagBlock ? `\n\n${flagBlock}` : ''}
     `.trim();
 
-    const response = await agent.stream([{ role: 'user', content: prompt }], {
-      memory: {
-        thread: runId,
-        resource: 'default',
-        options: { readOnly: true },
-      },
-      maxSteps: 1,
-    });
-
     let report = '';
-    for await (const chunk of response.textStream) {
-      process.stdout.write(chunk);
-      report += chunk;
+    let feedback = '';
+
+    for (let attempt = 1; attempt <= MAX_SYNTH_ATTEMPTS; attempt++) {
+      const prompt = feedback ? `${basePrompt}\n\n${feedback}` : basePrompt;
+
+      const response = await agent.stream([{ role: 'user', content: prompt }], {
+        memory: {
+          thread: runId,
+          resource: 'default',
+          options: { readOnly: true },
+        },
+        maxSteps: 1,
+      });
+
+      let draft = '';
+      for await (const chunk of response.textStream) {
+        process.stdout.write(chunk);
+        draft += chunk;
+      }
+      report = normalizeCitations(draft);
+
+      const grade = gradeReportStructure(report);
+      if (grade.passed) break;
+
+      if (attempt === MAX_SYNTH_ATTEMPTS) {
+        logger.warn(
+          `Synthesis structural defects persisted after ${attempt} attempt(s): ${grade.issues.join(' ')}`,
+        );
+        break;
+      }
+
+      feedback = renderRetryFeedback(grade.issues);
     }
 
-    return { threadId: runId, report: normalizeCitations(report) };
+    return { threadId: runId, report };
   },
 });
