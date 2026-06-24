@@ -40,6 +40,21 @@ Working memory is a typed document with these sections (Zod schema enforced):
   - \`sourcesConsulted\`: array of { url, classifier: government|analyst|consulting|trade-press|sec-filing|company-ir|vendor|other }
   - \`openQuestions\`: array of strings (gaps you couldn't fill)
 
+# Writing to working memory (merge model)
+
+\`updateWorkingMemory\` MERGES by top-level section — you do NOT need to
+resend the whole document on every write. This keeps writes cheap:
+
+  - To CHANGE a section, send that section's array — but include ALL of its
+    existing items PLUS your additions. Arrays are REPLACED wholesale, never
+    appended: sending only the new item DELETES the items already there. If
+    you are not certain of the current contents, call \`read-working-memory\`
+    first, then send the full updated array.
+  - OMIT every section you are not changing. Omitted sections are preserved
+    untouched — this is the cheap path, so prefer it.
+  - NEVER send an empty array \`[]\` for a section you don't intend to clear;
+    that erases it.
+
 # Tool calling
 
 You have access to \`web-search\`, \`fetch-url\`, \`find-in-page\`,

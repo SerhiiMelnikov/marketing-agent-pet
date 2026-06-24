@@ -31,5 +31,15 @@ export async function readResearchMemory(
     );
   }
 
-  return parsed.data;
+  // The schema's sections are `.optional()` (to allow partial merge writes), so
+  // coalesce each absent section to `[]` here — the single read chokepoint —
+  // giving every consumer a strict, fully-populated `ResearchMemory`.
+  const data = parsed.data;
+  return {
+    marketTrends: data.marketTrends ?? [],
+    competitors: data.competitors ?? [],
+    candidateIcps: data.candidateIcps ?? [],
+    sourcesConsulted: data.sourcesConsulted ?? [],
+    openQuestions: data.openQuestions ?? [],
+  };
 }
