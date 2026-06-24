@@ -9,7 +9,7 @@ export { mastraModelIdSchema, mastraModelIdPoolSchema } from './mastra-model-id'
 const DEFAULT_MODELS: Record<ModelRole, MastraModelId> = {
   researcher: 'anthropic/claude-haiku-4-5',
   synthesizer: 'anthropic/claude-sonnet-4-6',
-  cheap: 'google/gemini-2.5-flash-lite',
+  cheap: 'google/gemma-4-31b-it',
 };
 
 const POOLS: Partial<Record<ModelRole, readonly MastraModelId[]>> = {
