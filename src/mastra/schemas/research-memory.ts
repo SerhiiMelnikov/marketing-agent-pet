@@ -4,10 +4,20 @@ import { z } from 'zod';
 
 const confidenceLevel = z.enum(['high', 'medium', 'low']);
 
+// Plain string + refine instead of `z.url()`. Zod's `z.url()` emits JSON-schema
+// `format: "uri"`, which Mastra's Ajv (configured without ajv-formats) cannot
+// resolve — logging `unknown format "uri" ignored in schema` on every
+// working-memory write. A `.refine` validates URL-ness at parse time (in
+// readResearchMemory's safeParse) without emitting a `format` keyword, so the
+// tool-input schema is a bare string and the Ajv noise is gone.
+const urlString = z
+  .string()
+  .refine((v) => URL.canParse(v), { message: 'must be a valid URL' });
+
 const marketTrendSchema = z.object({
   claim: z.string(),
   evidence: z.string(),
-  sourceUrl: z.url(),
+  sourceUrl: urlString,
   publisher: z.string(),
   year: z.number().int().optional(),
   confidence: confidenceLevel,
@@ -17,7 +27,7 @@ const competitorSchema = z.object({
   name: z.string(),
   description: z.string(),
   weightClass: z.enum(['enterprise', 'mid-market', 'boutique']),
-  sources: z.array(z.url()).min(1),
+  sources: z.array(urlString).min(1),
 });
 
 const icpSchema = z.object({
@@ -27,7 +37,7 @@ const icpSchema = z.object({
 });
 
 const sourceConsultedSchema = z.object({
-  url: z.url(),
+  url: urlString,
   classifier: z.enum([
     'government',
     'analyst',
