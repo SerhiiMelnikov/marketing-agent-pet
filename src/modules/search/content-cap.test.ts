@@ -35,6 +35,12 @@ describe('capResultContent', () => {
     expect(last.snippet).toBe(`s${CONTENT_RESULT_LIMIT}`);
   });
 
+  it('keeps content on every result at exactly the limit', () => {
+    const out = capResultContent(make(CONTENT_RESULT_LIMIT));
+
+    expect(out.every((r) => r.content !== undefined)).toBe(true);
+  });
+
   it('returns an empty array unchanged', () => {
     expect(capResultContent([])).toEqual([]);
   });

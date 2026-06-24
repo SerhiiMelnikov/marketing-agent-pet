@@ -67,7 +67,7 @@ Read the working-memory document now and produce the final markdown report.${fla
 
       if (attempt === MAX_SYNTH_ATTEMPTS) {
         logger.warn(
-          `Synthesis structural defects persisted after ${attempt} attempt(s): ${grade.issues.join(' ')}`,
+          `Synthesis structural defects persisted after ${MAX_SYNTH_ATTEMPTS} attempts: ${grade.issues.join(' ')}`,
         );
         break;
       }

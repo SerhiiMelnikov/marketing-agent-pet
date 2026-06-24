@@ -22,6 +22,7 @@ describe('gradeReportStructure', () => {
     const g = gradeReportStructure(withSources('Body {"source": "x"} cites [1].', '[1] A — x'));
 
     expect(g.passed).toBe(false);
+    expect(g.issues.join(' ')).toMatch(/JSON/i);
   });
 
   it('passes when a listed source is merely uncited (unused does not gate)', () => {
