@@ -1,23 +1,6 @@
 import { createScorer } from '@mastra/core/evals';
-import { INCOMPLETE_MSG, SOURCES_HEADING } from './constants';
-import { preprocessRun } from './utils';
-
-const REF_MARKER = /\[\d+\]/g;
-
-function splitBodyAndSources(report: string): { body: string; sources: string } {
-  const match = report.match(SOURCES_HEADING);
-
-  return !match || match.index === undefined
-    ? { body: report, sources: '' }
-    : {
-        body: report.slice(0, match.index),
-        sources: report.slice(match.index),
-      };
-}
-
-function extractRefs(text: string): Set<string> {
-  return new Set(text.match(REF_MARKER) ?? []);
-}
+import { INCOMPLETE_MSG } from './constants';
+import { preprocessRun, splitBodyAndSources, extractRefs, orphanCitations } from './utils';
 
 export const citationIntegrityScorer = createScorer({
   id: 'citation-integrity',
@@ -44,14 +27,14 @@ export const citationIntegrityScorer = createScorer({
     const inlineRefs = extractRefs(body);
     const sourceRefs = extractRefs(sources);
 
-    const orphanCitations = [...inlineRefs].filter((r) => !sourceRefs.has(r));
+    const orphans = orphanCitations(base.text);
     const unusedSources = [...sourceRefs].filter((r) => !inlineRefs.has(r));
 
     return {
       isComplete: true,
       inlineCount: inlineRefs.size,
       sourceCount: sourceRefs.size,
-      orphanCitations,
+      orphanCitations: orphans,
       unusedSources,
       hasSourcesSection: sources.length > 0,
     };

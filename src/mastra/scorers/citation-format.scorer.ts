@@ -1,6 +1,6 @@
 import { createScorer } from '@mastra/core/evals';
 import { INCOMPLETE_MSG } from './constants';
-import { preprocessRun } from './utils';
+import { preprocessRun, citationFormatIssues } from './utils';
 
 export const citationFormatScorer = createScorer({
   id: 'citation-format',
@@ -13,12 +13,7 @@ export const citationFormatScorer = createScorer({
 
     if (!isComplete) return 0;
 
-    const jsonCitationLeak = /【?\{?["']?source["']?\s*:/.test(text);
-    const rawBracketObjects = /【.*\{.*\}.*】/.test(text);
-    // Native model citation markers (`【1†Source】`, `【1】`) instead of `[N]`.
-    const nativeCitationMarker = /[【】]/.test(text);
-
-    return +!(jsonCitationLeak || rawBracketObjects || nativeCitationMarker);
+    return +!citationFormatIssues(text).length;
   })
   .generateReason(({ score, results }) => {
     if (!results.preprocessStepResult.isComplete) {
