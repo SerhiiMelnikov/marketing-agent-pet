@@ -40,12 +40,35 @@ const sourceConsultedSchema = z.object({
   ]),
 });
 
+// Top-level sections are `.optional()` (deliberately NOT `.default([])`) so the
+// `updateWorkingMemory` tool accepts PARTIAL writes. Mastra merges working
+// memory by top-level field, so the researcher can send only the section(s) it
+// is changing and the rest are preserved — instead of being forced to resend
+// the whole ~5k-token document on every write (and hard-failing when it sends a
+// subset). `.default([])` would be a trap: Zod would materialize an empty array
+// into the parsed tool input, and because Mastra REPLACES arrays wholesale, that
+// empty array would WIPE the existing section. `.optional()` (an absent field)
+// is precisely what lets merge keep the prior value.
 export const researchMemorySchema = z.object({
-  marketTrends: z.array(marketTrendSchema),
-  competitors: z.array(competitorSchema),
-  candidateIcps: z.array(icpSchema),
-  sourcesConsulted: z.array(sourceConsultedSchema),
-  openQuestions: z.array(z.string()),
+  marketTrends: z.array(marketTrendSchema).optional(),
+  competitors: z.array(competitorSchema).optional(),
+  candidateIcps: z.array(icpSchema).optional(),
+  sourcesConsulted: z.array(sourceConsultedSchema).optional(),
+  openQuestions: z.array(z.string()).optional(),
 });
 
-export type ResearchMemory = z.infer<typeof researchMemorySchema>;
+export type MarketTrend = z.infer<typeof marketTrendSchema>;
+export type Competitor = z.infer<typeof competitorSchema>;
+export type Icp = z.infer<typeof icpSchema>;
+export type SourceConsulted = z.infer<typeof sourceConsultedSchema>;
+
+// Read-side strict shape: `readResearchMemory` coalesces every absent section to
+// `[]`, so all downstream consumers (gate, metrics, corroboration, synthesizer)
+// see guaranteed arrays and need no `?? []` guards of their own.
+export interface ResearchMemory {
+  marketTrends: MarketTrend[];
+  competitors: Competitor[];
+  candidateIcps: Icp[];
+  sourcesConsulted: SourceConsulted[];
+  openQuestions: string[];
+}
